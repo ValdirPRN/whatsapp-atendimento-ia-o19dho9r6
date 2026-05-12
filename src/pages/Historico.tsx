@@ -54,6 +54,7 @@ export default function Historico() {
   const [reports, setReports] = useState<ReportRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState<string>('Todos')
+  const [filterCategory, setFilterCategory] = useState<string>('Todas')
   const { toast } = useToast()
 
   const fetchReports = async () => {
@@ -78,9 +79,13 @@ export default function Historico() {
     fetchReports()
   })
 
-  const filteredErrors = reports.filter((error) =>
-    filterStatus === 'Todos' ? true : error.status === filterStatus,
-  )
+  const filteredErrors = reports.filter((error) => {
+    const matchesStatus = filterStatus === 'Todos' ? true : error.status === filterStatus
+    const matchesCategory = filterCategory === 'Todas' ? true : error.category === filterCategory
+    return matchesStatus && matchesCategory
+  })
+
+  const categories = Array.from(new Set(reports.map((r) => r.category).filter(Boolean)))
 
   const isNew = (dateStr: string) => {
     const diff = new Date().getTime() - new Date(dateStr).getTime()
@@ -167,6 +172,21 @@ export default function Historico() {
               <SelectItem value="Reportado">Reportado</SelectItem>
               <SelectItem value="Em Análise">Em Análise</SelectItem>
               <SelectItem value="Corrigido">Corrigido</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-[180px] flex-1 sm:flex-none">
+              <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+              <SelectValue placeholder="Filtrar por Categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Todas">Todas as Categorias</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
