@@ -1,43 +1,69 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
-import { Toaster } from '@/components/ui/toaster'
-import { Toaster as Sonner } from '@/components/ui/sonner'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import Layout from '@/components/Layout'
-import Index from '@/pages/Index'
-import NovoRegistro from '@/pages/NovoRegistro'
-import Historico from '@/pages/Historico'
-import ErroDetalhes from '@/pages/ErroDetalhes'
-import NotFound from '@/pages/NotFound'
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
+import { Toaster } from '@/components/ui/sonner'
 import { Login } from '@/pages/Login'
+import Historico from '@/pages/Historico'
+import NotFound from '@/pages/NotFound'
+import { MessageSquareWarning, LogOut } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
-function PrivateRoute() {
-  const { user, loading } = useAuth()
-  if (loading) return null
-  return user ? <Outlet /> : <Navigate to="/login" replace />
+function Layout() {
+  const { user, signOut } = useAuth()
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  return (
+    <div className="min-h-screen bg-muted/20 flex flex-col">
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="container max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2 font-bold text-xl tracking-tight">
+            <div className="bg-primary w-8 h-8 flex items-center justify-center rounded-lg shadow-sm">
+              <MessageSquareWarning className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span>
+              Agent<span className="font-light opacity-70">Pro</span>
+            </span>
+          </div>
+          <nav className="flex items-center gap-4">
+            <div className="hidden sm:flex flex-col items-end mr-4">
+              <span className="text-sm font-medium leading-none">{user.name || user.username}</span>
+              <span className="text-xs text-muted-foreground mt-1">{user.email}</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={signOut}
+              className="gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Sair</span>
+            </Button>
+          </nav>
+        </div>
+      </header>
+      <main className="flex-1">
+        <Outlet />
+      </main>
+    </div>
+  )
 }
 
-const App = () => (
-  <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
+export default function App() {
+  return (
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
+      <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route element={<PrivateRoute />}>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/novo-registro" element={<NovoRegistro />} />
-              <Route path="/historico" element={<Historico />} />
-              <Route path="/erro/:id" element={<ErroDetalhes />} />
-            </Route>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Historico />} />
+            <Route path="/historico" element={<Navigate to="/" replace />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </TooltipProvider>
+      </BrowserRouter>
+      <Toaster position="top-right" richColors />
     </AuthProvider>
-  </BrowserRouter>
-)
-
-export default App
+  )
+}

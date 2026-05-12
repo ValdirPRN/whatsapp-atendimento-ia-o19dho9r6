@@ -1,37 +1,26 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import pb from '@/lib/pocketbase/client'
+import { useRealtime } from '@/hooks/use-realtime'
 import {
-  Calendar,
-  Filter,
-  MoreHorizontal,
-  FileText,
-  Image as ImageIcon,
-  Trash2,
-} from 'lucide-react'
-
-import { Card, CardContent } from '@/components/ui/card'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-import { useToast } from '@/hooks/use-toast'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import {
   Select,
   SelectContent,
@@ -39,329 +28,362 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { AlertCircle, CheckCircle2, Clock, MessageSquareWarning, Plus } from 'lucide-react'
+import { useAuth } from '@/hooks/use-auth'
+import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from 'sonner'
 
-import { useRealtime } from '@/hooks/use-realtime'
-import pb from '@/lib/pocketbase/client'
-import { ReportRecord } from '@/lib/types'
+interface Report {
+  id: string
+  title: string
+  context: string
+  actual_behavior: string
+  expected_behavior: string
+  category: string
+  severity: string
+  status: string
+  created: string
+  user_id?: string
+  expand?: {
+    user_id?: {
+      name: string
+      email: string
+    }
+  }
+}
+
+function NovoRelatoDialog({ onCreated }: { onCreated: () => void }) {
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const { user } = useAuth()
+
+  const [formData, setFormData] = useState({
+    title: '',
+    context: '',
+    actual_behavior: '',
+    expected_behavior: '',
+    category: '',
+    severity: '',
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      await pb.collection('reports').create({
+        ...formData,
+        status: 'Reportado',
+        user_id: user?.id,
+      })
+      toast.success('Relato registrado com sucesso!')
+      setOpen(false)
+      setFormData({
+        title: '',
+        context: '',
+        actual_behavior: '',
+        expected_behavior: '',
+        category: '',
+        severity: '',
+      })
+      onCreated()
+    } catch (error) {
+      toast.error('Erro ao registrar relato.')
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="gap-2 shadow-sm bg-primary hover:bg-primary/90">
+          <Plus className="w-4 h-4" />
+          Novo Relato
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Registrar Novo Erro</DialogTitle>
+          <DialogDescription>
+            Descreva detalhadamente o erro ou comportamento inesperado da IA.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Título do Erro</Label>
+            <Input
+              id="title"
+              placeholder="Ex: Mensagem sem contexto..."
+              required
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Categoria</Label>
+              <Select
+                required
+                value={formData.category}
+                onValueChange={(v) => setFormData({ ...formData, category: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Triagem da conversa">Triagem da conversa</SelectItem>
+                  <SelectItem value="Filtro de etiquetas do WhatsApp">
+                    Filtro de etiquetas
+                  </SelectItem>
+                  <SelectItem value="Geração de respostas">Geração de respostas</SelectItem>
+                  <SelectItem value="Outros">Outros</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Gravidade</Label>
+              <Select
+                required
+                value={formData.severity}
+                onValueChange={(v) => setFormData({ ...formData, severity: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Baixa">Baixa</SelectItem>
+                  <SelectItem value="Média">Média</SelectItem>
+                  <SelectItem value="Alta">Alta</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="context">Contexto (Opcional)</Label>
+            <textarea
+              id="context"
+              placeholder="O que o paciente disse ou qual era o fluxo?"
+              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
+              value={formData.context}
+              onChange={(e) => setFormData({ ...formData, context: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="actual">Comportamento Atual (O que a IA fez?)</Label>
+            <textarea
+              id="actual"
+              required
+              placeholder="A IA inventou uma resposta..."
+              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
+              value={formData.actual_behavior}
+              onChange={(e) => setFormData({ ...formData, actual_behavior: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="expected">Comportamento Esperado (O que deveria fazer?)</Label>
+            <textarea
+              id="expected"
+              required
+              placeholder="A IA deveria pedir mais contexto..."
+              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
+              value={formData.expected_behavior}
+              onChange={(e) => setFormData({ ...formData, expected_behavior: e.target.value })}
+            />
+          </div>
+
+          <DialogFooter className="pt-4">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Salvando...' : 'Salvar Relato'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 export default function Historico() {
-  const [reports, setReports] = useState<ReportRecord[]>([])
+  const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
-  const [filterStatus, setFilterStatus] = useState<string>('Todos')
-  const [filterCategory, setFilterCategory] = useState<string>('Todas')
-  const { toast } = useToast()
 
-  const fetchReports = async () => {
+  const loadReports = async () => {
     try {
-      const records = await pb.collection('reports').getFullList<ReportRecord>({
+      const records = await pb.collection('reports').getFullList<Report>({
         sort: '-created',
         expand: 'user_id',
       })
       setReports(records)
-    } catch (e) {
-      console.error(e)
+    } catch (error) {
+      console.error('Error loading reports:', error)
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchReports()
+    loadReports()
   }, [])
 
   useRealtime('reports', () => {
-    fetchReports()
+    loadReports()
   })
-
-  const filteredErrors = reports.filter((error) => {
-    const matchesStatus = filterStatus === 'Todos' ? true : error.status === filterStatus
-    const matchesCategory = filterCategory === 'Todas' ? true : error.category === filterCategory
-    return matchesStatus && matchesCategory
-  })
-
-  const categories = Array.from(new Set(reports.map((r) => r.category).filter(Boolean)))
-
-  const isNew = (dateStr: string) => {
-    const diff = new Date().getTime() - new Date(dateStr).getTime()
-    return diff < 24 * 60 * 60 * 1000
-  }
 
   const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'Crítica':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
-      case 'Alta':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300'
-      case 'Média':
-        return 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'
+    switch (severity?.toLowerCase()) {
+      case 'alta':
+        return 'bg-red-500/10 text-red-500 border-red-500/20'
+      case 'média':
+      case 'media':
+        return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20'
+      case 'baixa':
+        return 'bg-green-500/10 text-green-500 border-green-500/20'
       default:
-        return 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
+        return 'bg-slate-500/10 text-slate-500 border-slate-500/20'
     }
   }
 
-  const handleDelete = async (id: string) => {
-    try {
-      await pb.collection('reports').delete(id)
-      toast({ title: 'Sucesso', description: 'Registro excluído com sucesso.' })
-    } catch (e) {
-      console.error(e)
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível excluir o registro.',
-        variant: 'destructive',
-      })
-    }
-  }
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'Corrigido':
-        return (
-          <Badge variant="default" className="bg-emerald-500 hover:bg-emerald-600">
-            Corrigido
-          </Badge>
-        )
-      case 'Em Análise':
-        return (
-          <Badge
-            variant="secondary"
-            className="bg-indigo-100 text-indigo-800 hover:bg-indigo-200 border-transparent dark:bg-indigo-900/40 dark:text-indigo-300"
-          >
-            Em Análise
-          </Badge>
-        )
-      case 'Reportado':
-        return (
-          <Badge variant="outline" className="text-muted-foreground border-muted-foreground/30">
-            Reportado
-          </Badge>
-        )
+  const getStatusIcon = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'resolvido':
+        return <CheckCircle2 className="w-4 h-4 text-green-500" />
+      case 'em análise':
+      case 'em analise':
+        return <Clock className="w-4 h-4 text-yellow-500" />
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <AlertCircle className="w-4 h-4 text-blue-500" />
     }
   }
 
   return (
-    <div className="space-y-6 animate-fade-in-up h-full flex flex-col">
+    <div className="container max-w-6xl mx-auto py-8 px-4 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-white">Histórico de Erros</h2>
-          <p className="text-slate-300 text-sm">
-            Gerencie e acompanhe todos os registros de anomalias do AgentPro em tempo real.
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+            <MessageSquareWarning className="w-8 h-8 text-primary" />
+            Histórico de Relatos
+          </h1>
+          <p className="text-muted-foreground">
+            Acompanhe todos os erros e comportamentos inesperados reportados pela equipe.
           </p>
         </div>
-
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Button variant="outline" className="flex-1 sm:flex-none">
-            <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-            <span>Últimos 30 dias</span>
-          </Button>
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-[180px] flex-1 sm:flex-none">
-              <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
-              <SelectValue placeholder="Filtrar por Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Todos">Todos os Status</SelectItem>
-              <SelectItem value="Reportado">Reportado</SelectItem>
-              <SelectItem value="Em Análise">Em Análise</SelectItem>
-              <SelectItem value="Corrigido">Corrigido</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={filterCategory} onValueChange={setFilterCategory}>
-            <SelectTrigger className="w-[180px] flex-1 sm:flex-none">
-              <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
-              <SelectValue placeholder="Filtrar por Categoria" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Todas">Todas as Categorias</SelectItem>
-              {categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <NovoRelatoDialog onCreated={loadReports} />
       </div>
 
-      <Card className="flex-1 shadow-2xl border-white/10 bg-black/60 backdrop-blur-2xl flex flex-col overflow-hidden">
-        <CardContent className="p-0 overflow-auto">
-          <Table>
-            <TableHeader className="bg-black/80 sticky top-0 z-10 border-b border-white/10 backdrop-blur-md">
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[100px] text-slate-300">ID</TableHead>
-                <TableHead className="text-slate-300">Problema & Contexto</TableHead>
-                <TableHead className="hidden xl:table-cell text-slate-300">
-                  Comportamento Real
-                </TableHead>
-                <TableHead className="hidden xl:table-cell text-slate-300">
-                  Comportamento Esperado
-                </TableHead>
-                <TableHead className="hidden lg:table-cell text-slate-300">Categoria</TableHead>
-                <TableHead className="text-slate-300">Prioridade</TableHead>
-                <TableHead className="text-slate-300">Status</TableHead>
-                <TableHead className="hidden md:table-cell text-slate-300">Data</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={9} className="h-32 text-center text-slate-400">
-                    Carregando registros...
-                  </TableCell>
-                </TableRow>
-              ) : filteredErrors.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={9} className="h-64 text-center">
-                    <div className="flex flex-col items-center justify-center space-y-3">
-                      <FileText className="h-10 w-10 text-slate-500" />
-                      <p className="text-lg font-medium text-slate-300">Nenhum relato encontrado</p>
-                      <p className="text-sm text-slate-500">
-                        O histórico de erros está vazio no momento.
-                      </p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredErrors.map((error: ReportRecord) => (
-                  <TableRow key={error.id} className="group hover:bg-muted/20 transition-colors">
-                    <TableCell className="font-mono text-xs font-medium text-blue-400 align-top pt-4">
-                      <Link to={`/erro/${error.id}`}>{error.id}</Link>
-                    </TableCell>
-                    <TableCell className="max-w-[250px] sm:max-w-[300px]">
-                      <div className="flex items-start gap-3">
-                        {error.images && error.images.length > 0 ? (
-                          <div className="h-12 w-12 shrink-0 rounded-md overflow-hidden bg-black/50 border border-white/10 flex items-center justify-center">
-                            <img
-                              src={pb.files.getURL(error as any, error.images[0], {
-                                thumb: '100x100',
-                              })}
-                              alt="Thumbnail"
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="h-12 w-12 shrink-0 rounded-md bg-black/50 border border-white/10 flex items-center justify-center">
-                            <ImageIcon className="h-5 w-5 text-slate-500" />
-                          </div>
-                        )}
-                        <div className="flex flex-col space-y-1 overflow-hidden">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Link
-                              to={`/erro/${error.id}`}
-                              className="font-medium text-slate-100 group-hover:text-white transition-colors truncate block max-w-full"
-                            >
-                              {error.title || 'Sem título'}
-                            </Link>
-                            {isNew(error.created) && (
-                              <Badge className="h-4 text-[9px] px-1 bg-blue-500 hover:bg-blue-600 text-white border-none shrink-0">
-                                NOVO
-                              </Badge>
-                            )}
-                          </div>
-                          <span className="text-xs text-slate-400 line-clamp-2">
-                            {error.context || error.actual_behavior}
-                          </span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-cell align-top pt-4 max-w-[200px]">
-                      <span className="text-xs text-slate-300 line-clamp-3">
-                        {error.actual_behavior}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="overflow-hidden">
+              <CardHeader className="space-y-2">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-6 w-3/4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-20 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : reports.length === 0 ? (
+        <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed">
+          <CheckCircle2 className="w-12 h-12 text-muted-foreground/50 mb-4" />
+          <CardTitle className="text-xl text-muted-foreground">Nenhum relato encontrado</CardTitle>
+          <CardDescription>Quando a equipe registrar erros, eles aparecerão aqui.</CardDescription>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {reports.map((report) => (
+            <Card
+              key={report.id}
+              className="flex flex-col hover:shadow-md transition-shadow duration-300 group"
+            >
+              <CardHeader className="pb-4">
+                <div className="flex justify-between items-start mb-2 gap-2">
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full border font-medium ${getSeverityColor(report.severity)}`}
+                  >
+                    {report.severity || 'Sem gravidade'}
+                  </span>
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
+                    {getStatusIcon(report.status)}
+                    <span className="capitalize">{report.status || 'Reportado'}</span>
+                  </div>
+                </div>
+                <CardTitle className="text-xl line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                  {report.title}
+                </CardTitle>
+                <CardDescription className="flex flex-wrap items-center gap-2 text-xs">
+                  <span>
+                    {format(new Date(report.created), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                  </span>
+                  {report.expand?.user_id && (
+                    <>
+                      <span>•</span>
+                      <span className="truncate max-w-[120px]" title={report.expand.user_id.name}>
+                        {report.expand.user_id.name}
                       </span>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-cell align-top pt-4 max-w-[200px]">
-                      <span className="text-xs text-slate-300 line-clamp-3">
-                        {error.expected_behavior}
-                      </span>
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell align-top pt-4">
-                      <span className="text-sm text-slate-200">{error.category}</span>
-                    </TableCell>
-                    <TableCell className="align-top pt-4">
-                      <Badge
-                        variant="secondary"
-                        className={`${getSeverityColor(error.severity)} border-transparent hover:bg-opacity-80`}
-                      >
-                        {error.severity}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="align-top pt-4">{getStatusBadge(error.status)}</TableCell>
-                    <TableCell className="hidden md:table-cell text-slate-400 text-sm align-top pt-4">
-                      {new Date(error.created).toLocaleDateString('pt-BR')}
-                    </TableCell>
-                    <TableCell className="align-top pt-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              className="h-8 w-8 p-0 text-slate-300 hover:text-white hover:bg-white/10"
-                            >
-                              <span className="sr-only">Abrir menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <Link to={`/erro/${error.id}`} className="flex items-center">
-                                <FileText className="mr-2 h-4 w-4" /> Ver Detalhes
-                              </Link>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                    </>
+                  )}
+                </CardDescription>
+              </CardHeader>
 
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              className="h-8 w-8 p-0 text-slate-300 hover:text-red-400 hover:bg-red-400/10"
-                            >
-                              <span className="sr-only">Excluir</span>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent className="bg-slate-950 border-white/10">
-                            <AlertDialogHeader>
-                              <AlertDialogTitle className="text-white">
-                                Excluir Registro?
-                              </AlertDialogTitle>
-                              <AlertDialogDescription className="text-slate-400">
-                                Tem certeza de que deseja excluir este registro? Esta ação não pode
-                                ser desfeita e removerá o registro permanentemente do histórico.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel className="bg-transparent border-white/10 text-white hover:bg-white/10 hover:text-white">
-                                Cancelar
-                              </AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(error.id)}
-                                className="bg-red-600 text-white hover:bg-red-700"
-                              >
-                                Excluir
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+              <CardContent className="flex-1 space-y-4">
+                {report.context && (
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
+                      Contexto
+                    </span>
+                    <p className="text-sm text-foreground/90 bg-muted/40 p-2.5 rounded-md border border-border/50 line-clamp-3">
+                      {report.context}
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 gap-3 pt-2">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-bold uppercase text-red-500/80 tracking-wider flex items-center gap-1">
+                      Comportamento Atual
+                    </span>
+                    <p className="text-sm text-foreground/80 line-clamp-2">
+                      {report.actual_behavior}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-bold uppercase text-green-500/80 tracking-wider flex items-center gap-1">
+                      Comportamento Esperado
+                    </span>
+                    <p className="text-sm text-foreground/80 line-clamp-2">
+                      {report.expected_behavior}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+
+              {report.category && (
+                <CardFooter className="pt-4 border-t bg-muted/10 flex justify-between items-center">
+                  <span
+                    className="text-xs font-medium text-muted-foreground bg-secondary px-2 py-1 rounded-md truncate max-w-[200px]"
+                    title={report.category}
+                  >
+                    {report.category}
+                  </span>
+                </CardFooter>
               )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
