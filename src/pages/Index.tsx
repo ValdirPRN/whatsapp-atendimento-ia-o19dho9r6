@@ -111,7 +111,10 @@ export default function Index() {
         <div className="relative flex items-center w-56 h-12 group cursor-pointer">
           <div className="absolute inset-0 w-full h-full filter-gooey -z-10 pointer-events-none">
             <div className="absolute inset-0 bg-orange-500 rounded-full" />
-            <div className="absolute top-0 right-0 bg-orange-500 w-12 h-12 rounded-full transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-x-12" />
+            <div
+              className="absolute top-0 right-0 bg-orange-500 w-12 h-12 rounded-full transition-transform duration-500 group-hover:translate-x-12"
+              style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+            />
           </div>
           <Link
             to="/novo-registro"
@@ -119,7 +122,10 @@ export default function Index() {
           >
             Registrar Anomalia
           </Link>
-          <div className="absolute top-0 right-0 w-12 h-12 flex items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-x-12 z-10 opacity-0 group-hover:opacity-100 pointer-events-none">
+          <div
+            className="absolute top-0 right-0 w-12 h-12 flex items-center justify-center transition-all duration-500 group-hover:translate-x-12 z-10 opacity-0 group-hover:opacity-100 pointer-events-none"
+            style={{ transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+          >
             <ArrowRight className="w-5 h-5 text-black" />
           </div>
         </div>
