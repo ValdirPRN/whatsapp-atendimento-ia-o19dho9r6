@@ -44,7 +44,7 @@ export function Login() {
           <CardDescription>Faça login para acessar o painel de controle</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4" noValidate>
             <div className="space-y-2">
               <Input
                 type="text"
