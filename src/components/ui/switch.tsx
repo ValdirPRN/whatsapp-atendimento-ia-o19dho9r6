@@ -1,4 +1,3 @@
-/* Switch Component primitives - A component that displays a switch (a component that displays a toggle) - from shadcn/ui (exposes Switch) */
 import * as React from 'react'
 import * as SwitchPrimitives from '@radix-ui/react-switch'
 
@@ -18,7 +17,7 @@ const Switch = React.forwardRef<
   >
     <SwitchPrimitives.Thumb
       className={cn(
-        'pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0',
+        'pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0 duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)]',
       )}
     />
   </SwitchPrimitives.Root>
