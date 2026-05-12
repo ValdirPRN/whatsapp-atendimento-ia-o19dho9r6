@@ -33,6 +33,8 @@ import { useToast } from '@/components/ui/use-toast'
 const formSchema = z.object({
   title: z.string().min(5, 'O título deve ter pelo menos 5 caracteres.'),
   context: z.string().min(20, 'Descreva com mais detalhes o que ocorreu (mín. 20 caracteres).'),
+  aiErrorDescription: z.string().min(5, 'Descreva o que a IA fez de errado.'),
+  expectedBehavior: z.string().min(5, 'Descreva o que a IA deveria ter feito.'),
   technicalNotes: z.string().optional(),
   category: z.string().min(1, 'Selecione uma categoria.'),
   severity: z.string().min(1, 'Selecione a prioridade.'),
@@ -49,6 +51,8 @@ export default function NovoRegistro() {
     defaultValues: {
       title: '',
       context: '',
+      aiErrorDescription: '',
+      expectedBehavior: '',
       technicalNotes: '',
       category: '',
       severity: 'Média',
@@ -71,6 +75,8 @@ export default function NovoRegistro() {
       id: `ERR-${1043 + mockErrors.length}`,
       title: values.title,
       context: values.context,
+      aiErrorDescription: values.aiErrorDescription,
+      expectedBehavior: values.expectedBehavior,
       technicalNotes: values.technicalNotes,
       category: values.category as any,
       severity: values.severity as any,
@@ -214,6 +220,42 @@ export default function NovoRegistro() {
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="aiErrorDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>O que a IA fez de errado</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Descreva exatamente o comportamento incorreto da IA..."
+                        className="min-h-[100px] bg-background resize-y"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="expectedBehavior"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>O que a IA deveria ter feito</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Descreva o que era esperado que a IA fizesse nesta situação..."
+                        className="min-h-[100px] bg-background resize-y"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}

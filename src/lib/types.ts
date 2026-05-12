@@ -21,6 +21,8 @@ export interface AIError {
   id: string
   title: string
   context: string
+  aiErrorDescription?: string
+  expectedBehavior?: string
   technicalNotes?: string
   category: ErrorCategory
   severity: ErrorSeverity
