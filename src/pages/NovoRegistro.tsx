@@ -29,6 +29,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useToast } from '@/components/ui/use-toast'
 import { useAuth } from '@/hooks/use-auth'
 import pb from '@/lib/pocketbase/client'
+import { extractFieldErrors } from '@/lib/pocketbase/errors'
 
 const formSchema = z.object({
   title: z.string().min(5, 'O título deve ter pelo menos 5 caracteres.'),
@@ -102,11 +103,23 @@ export default function NovoRegistro() {
       }, 1500)
     } catch (error) {
       console.error(error)
-      toast({
-        title: 'Erro ao salvar registro',
-        description: 'Ocorreu um erro ao enviar os dados. Tente novamente.',
-        variant: 'destructive',
-      })
+      const fieldErrors = extractFieldErrors(error)
+      if (Object.keys(fieldErrors).length > 0) {
+        Object.entries(fieldErrors).forEach(([field, message]) => {
+          form.setError(field as any, { type: 'server', message })
+        })
+        toast({
+          title: 'Erro de validação',
+          description: 'Verifique os campos preenchidos e tente novamente.',
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Erro ao salvar registro',
+          description: 'Ocorreu um erro ao enviar os dados. Tente novamente.',
+          variant: 'destructive',
+        })
+      }
       setIsSubmitting(false)
     }
   }
