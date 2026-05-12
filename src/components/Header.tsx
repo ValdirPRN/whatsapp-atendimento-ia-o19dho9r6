@@ -34,9 +34,14 @@ export function Header() {
           >
             <path d="M15 85V15h12l18 35 18-35h12v70h-12V35L45 70h-10L17 35v50H15z" />
           </svg>
-          <span className="text-xl font-bold tracking-tight text-white hidden sm:block">
-            Agent<span className="text-cyan-400">Pro</span>
-          </span>
+          <div className="hidden sm:flex flex-col justify-center">
+            <span className="text-xl font-bold tracking-tight text-white leading-none">
+              Agent<span className="text-cyan-400">Pro</span>
+            </span>
+            <span className="text-[10px] text-cyan-400/70 font-medium uppercase tracking-wider mt-1">
+              PRN - MEDimagem | IA Palhoça
+            </span>
+          </div>
         </Link>
       </div>
 
