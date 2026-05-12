@@ -11,13 +11,12 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { LayoutDashboard, ListTodo, PlusCircle, Settings, MessageSquareWarning } from 'lucide-react'
+import { LayoutDashboard, ListTodo, PlusCircle, MessageSquareWarning } from 'lucide-react'
 
 const items = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
   { title: 'Histórico de Erros', url: '/historico', icon: ListTodo },
   { title: 'Novo Registro', url: '/novo-registro', icon: PlusCircle },
-  { title: 'Configurações', url: '/configuracoes', icon: Settings },
 ]
 
 export function AppSidebar() {

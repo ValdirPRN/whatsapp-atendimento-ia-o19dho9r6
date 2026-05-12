@@ -31,14 +31,6 @@ const App = () => (
               <Route path="/novo-registro" element={<NovoRegistro />} />
               <Route path="/historico" element={<Historico />} />
               <Route path="/erro/:id" element={<ErroDetalhes />} />
-              <Route
-                path="/configuracoes"
-                element={
-                  <div className="p-8 text-center text-muted-foreground">
-                    Página de configurações em construção.
-                  </div>
-                }
-              />
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />
