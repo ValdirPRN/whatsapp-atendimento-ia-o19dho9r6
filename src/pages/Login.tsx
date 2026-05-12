@@ -48,7 +48,7 @@ export function Login() {
             <div className="space-y-2">
               <Input
                 type="text"
-                placeholder="Email ou Usuário (ex: Paulo novack)"
+                placeholder="Usuário ou Email (ex: Paulo novack)"
                 value={identity}
                 onChange={(e) => setIdentity(e.target.value)}
                 required
