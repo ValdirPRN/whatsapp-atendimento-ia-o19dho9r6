@@ -123,7 +123,7 @@ export default function NovoRegistro() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="shadow-sm border-white/10 bg-black/40 backdrop-blur-md filter-glass text-white">
+          <Card className="shadow-sm border-white/10 bg-black/20 backdrop-blur-md text-white">
             <CardContent className="pt-6 space-y-6">
               <FormField
                 control={form.control}
@@ -302,7 +302,7 @@ export default function NovoRegistro() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm border-white/10 bg-black/40 backdrop-blur-md filter-glass text-white mt-6">
+          <Card className="shadow-sm border-white/10 bg-black/20 backdrop-blur-md text-white mt-6">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <ImageIcon className="w-5 h-5 text-primary" /> Evidências (Capturas de Tela)

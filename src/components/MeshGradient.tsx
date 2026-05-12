@@ -20,7 +20,7 @@ export function MeshGradient() {
 
     // Layer 1: Solid Color Blobs
     const colors1 = ['#000000', '#06b6d4', '#0891b2', '#164e63', '#f97316']
-    const blobs = colors1.map((color) => ({
+    const blobs1 = colors1.map((color) => ({
       x: Math.random() * w,
       y: Math.random() * h,
       vx: (Math.random() - 0.5) * 1.5 * 0.3, // Speed constraint
@@ -29,15 +29,28 @@ export function MeshGradient() {
       color,
     }))
 
+    // Layer 2: Wireframe Layer
+    const colors2 = ['#000000', '#ffffff', '#06b6d4', '#f97316']
+    const blobs2 = colors2.map((color) => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 1.5 * 0.2, // Speed constraint 0.2
+      vy: (Math.random() - 0.5) * 1.5 * 0.2,
+      r: (Math.random() * 0.3 + 0.3) * Math.max(w, h),
+      color,
+    }))
+
     let raf: number
 
     const draw = () => {
+      ctx.globalAlpha = 1.0
+      ctx.globalCompositeOperation = 'source-over'
       ctx.fillStyle = '#000000'
       ctx.fillRect(0, 0, w, h)
 
-      // Render Mesh Gradient layer
+      // Render Base layer
       ctx.globalCompositeOperation = 'screen'
-      blobs.forEach((b) => {
+      blobs1.forEach((b) => {
         b.x += b.vx
         b.y += b.vy
         if (b.x < -b.r || b.x > w + b.r) b.vx *= -1
@@ -51,6 +64,36 @@ export function MeshGradient() {
         ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2)
         ctx.fill()
       })
+
+      // Render Wireframe layer
+      ctx.globalAlpha = 0.6 // Opacity 60%
+      ctx.globalCompositeOperation = 'screen'
+
+      blobs2.forEach((b) => {
+        b.x += b.vx
+        b.y += b.vy
+        if (b.x < -b.r || b.x > w + b.r) b.vx *= -1
+        if (b.y < -b.r || b.y > h + b.r) b.vy *= -1
+
+        // Draw circles for wireframe
+        ctx.lineWidth = 2
+        ctx.strokeStyle = b.color
+        ctx.beginPath()
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2)
+        ctx.stroke()
+      })
+
+      // Connecting lines for full wireframe aesthetic
+      ctx.beginPath()
+      for (let i = 0; i < blobs2.length; i++) {
+        for (let j = i + 1; j < blobs2.length; j++) {
+          ctx.moveTo(blobs2[i].x, blobs2[i].y)
+          ctx.lineTo(blobs2[j].x, blobs2[j].y)
+        }
+      }
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'
+      ctx.lineWidth = 1
+      ctx.stroke()
 
       raf = requestAnimationFrame(draw)
     }
