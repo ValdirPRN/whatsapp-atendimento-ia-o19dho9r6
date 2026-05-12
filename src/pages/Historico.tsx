@@ -1,8 +1,27 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, Filter, MoreHorizontal, FileText, Image as ImageIcon } from 'lucide-react'
+import {
+  Calendar,
+  Filter,
+  MoreHorizontal,
+  FileText,
+  Image as ImageIcon,
+  Trash2,
+} from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { useToast } from '@/hooks/use-toast'
 import {
   Table,
   TableBody,
@@ -35,6 +54,7 @@ export default function Historico() {
   const [reports, setReports] = useState<ReportRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState<string>('Todos')
+  const { toast } = useToast()
 
   const fetchReports = async () => {
     try {
@@ -77,6 +97,20 @@ export default function Historico() {
         return 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'
       default:
         return 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await pb.collection('reports').delete(id)
+      toast({ title: 'Sucesso', description: 'Registro excluído com sucesso.' })
+    } catch (e) {
+      console.error(e)
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível excluir o registro.',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -167,8 +201,14 @@ export default function Historico() {
                 </TableRow>
               ) : filteredErrors.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-32 text-center text-slate-400">
-                    Nenhum registro encontrado.
+                  <TableCell colSpan={9} className="h-64 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-3">
+                      <FileText className="h-10 w-10 text-slate-500" />
+                      <p className="text-lg font-medium text-slate-300">Nenhum relato encontrado</p>
+                      <p className="text-sm text-slate-500">
+                        O histórico de erros está vazio no momento.
+                      </p>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -239,25 +279,61 @@ export default function Historico() {
                     <TableCell className="hidden md:table-cell text-slate-400 text-sm align-top pt-4">
                       {new Date(error.created).toLocaleDateString('pt-BR')}
                     </TableCell>
-                    <TableCell className="align-top pt-4">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-slate-300 hover:text-white hover:bg-white/10"
-                          >
-                            <span className="sr-only">Abrir menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link to={`/erro/${error.id}`} className="flex items-center">
-                              <FileText className="mr-2 h-4 w-4" /> Ver Detalhes
-                            </Link>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <TableCell className="align-top pt-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-slate-300 hover:text-white hover:bg-white/10"
+                            >
+                              <span className="sr-only">Abrir menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <Link to={`/erro/${error.id}`} className="flex items-center">
+                                <FileText className="mr-2 h-4 w-4" /> Ver Detalhes
+                              </Link>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-slate-300 hover:text-red-400 hover:bg-red-400/10"
+                            >
+                              <span className="sr-only">Excluir</span>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="bg-slate-950 border-white/10">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-white">
+                                Excluir Registro?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className="text-slate-400">
+                                Tem certeza de que deseja excluir este registro? Esta ação não pode
+                                ser desfeita e removerá o registro permanentemente do histórico.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="bg-transparent border-white/10 text-white hover:bg-white/10 hover:text-white">
+                                Cancelar
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(error.id)}
+                                className="bg-red-600 text-white hover:bg-red-700"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
