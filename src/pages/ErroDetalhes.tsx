@@ -11,7 +11,7 @@ import {
   Image as ImageIcon,
   CheckCircle2,
   ChevronRight,
-  SearchZoomIn,
+  ZoomIn,
 } from 'lucide-react'
 
 import { mockErrors } from '@/lib/mock-data'
@@ -133,7 +133,7 @@ export default function ErroDetalhes() {
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                            <SearchZoomIn className="text-white h-8 w-8" />
+                            <ZoomIn className="text-white h-8 w-8" />
                           </div>
                         </div>
                       </DialogTrigger>
