@@ -8,8 +8,8 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
 export function Login() {
-  const [identity, setIdentity] = useState('samuelklausfischer@hotmail.com')
-  const [password, setPassword] = useState('Skip@Pass')
+  const [identity, setIdentity] = useState('')
+  const [password, setPassword] = useState('')
   const { signIn, loading } = useAuth()
   const navigate = useNavigate()
 
@@ -19,7 +19,7 @@ export function Login() {
 
     let loginIdentity = identity.trim()
     if (!loginIdentity.includes('@')) {
-      loginIdentity = loginIdentity.replace(/\s+/g, '').toLowerCase()
+      loginIdentity = loginIdentity.replace(/\s+/g, '_').toLowerCase()
     }
 
     const { error } = await signIn(loginIdentity, password)
@@ -52,6 +52,7 @@ export function Login() {
                 value={identity}
                 onChange={(e) => setIdentity(e.target.value)}
                 required
+                autoComplete="username"
                 className="bg-background"
               />
             </div>
