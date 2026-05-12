@@ -3,9 +3,9 @@ migrate(
     const usersCol = app.findCollectionByNameOrId('_pb_users_auth_')
 
     const seedUsers = [
-      { username: 'paulo_novack', name: 'Paulo novack', password: 'Prn2026' },
-      { username: 'joane', name: 'Joane', password: 'Prn2026' },
-      { username: 'admin', name: 'admin', password: 'admin' },
+      { username: 'paulo_novack', name: 'Paulo novack', password: 'Skip@2026' },
+      { username: 'joane', name: 'Joane', password: 'Skip@2026' },
+      { username: 'admin', name: 'admin', password: 'Skip@2026' },
     ]
 
     for (const u of seedUsers) {
