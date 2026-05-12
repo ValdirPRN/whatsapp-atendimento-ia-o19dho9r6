@@ -105,8 +105,7 @@ export default function Index() {
         </h1>
 
         <p className="text-xl text-white/60 max-w-2xl font-light mb-12">
-          The ultimate audit & monitoring platform for AI-driven customer service. Uncover anomalies
-          and track performance in real-time.
+          Sistema interno para relatar problemas sobre a IA de atendimento de Palhoça
         </p>
 
         <div className="relative flex items-center w-56 h-12 group cursor-pointer">
