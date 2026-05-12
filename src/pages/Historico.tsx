@@ -138,10 +138,10 @@ export default function Historico() {
         </div>
       </div>
 
-      <Card className="flex-1 shadow-sm border-border/50 flex flex-col overflow-hidden">
+      <Card className="flex-1 shadow-sm border-white/10 bg-black/40 backdrop-blur-md filter-glass flex flex-col overflow-hidden">
         <CardContent className="p-0 overflow-auto">
           <Table>
-            <TableHeader className="bg-muted/50 sticky top-0 z-10">
+            <TableHeader className="bg-black/60 sticky top-0 z-10 border-b border-white/10 backdrop-blur-sm">
               <TableRow>
                 <TableHead className="w-[100px]">ID</TableHead>
                 <TableHead>Problema & Contexto</TableHead>
