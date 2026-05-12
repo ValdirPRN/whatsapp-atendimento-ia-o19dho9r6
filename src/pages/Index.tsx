@@ -94,8 +94,8 @@ export default function Index() {
       <div className="flex flex-col items-center justify-center py-20 text-center relative">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-500/50 bg-black/30 backdrop-blur-md filter-glass mb-8 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
           <span className="flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
-          <span className="text-sm font-medium text-cyan-100 tracking-wide uppercase">
-            New Experience
+          <span className="text-sm font-medium text-cyan-100 tracking-wide whitespace-pre">
+            {' PRN - MEDimagem'}
           </span>
         </div>
 
@@ -105,7 +105,7 @@ export default function Index() {
         </h1>
 
         <p className="text-xl text-white/60 max-w-2xl font-light mb-12">
-          Sistema interno para relatar problemas sobre a IA de atendimento de Palhoça
+          sistema interno afim de relatar problemas sobre a ia de atendimento de palhoça
         </p>
 
         <div className="relative flex items-center w-56 h-12 group cursor-pointer">
