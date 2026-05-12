@@ -1,51 +1,47 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
-import { Toaster } from '@/components/ui/toaster'
-import { Toaster as Sonner } from '@/components/ui/sonner'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import Layout from '@/components/Layout'
-import Index from '@/pages/Index'
-import NovoRegistro from '@/pages/NovoRegistro'
-import Historico from '@/pages/Historico'
-import ErroDetalhes from '@/pages/ErroDetalhes'
-import NotFound from '@/pages/NotFound'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
 import { Login } from '@/pages/Login'
+import IndexPage from '@/pages/Index'
+import HistoricoPage from '@/pages/Historico'
+import { Layout } from '@/components/Layout'
 
-function PrivateRoute() {
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
-  if (loading) return null
-  return user ? <Outlet /> : <Navigate to="/login" replace />
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-muted-foreground animate-pulse">
+        Carregando AgentPro...
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  return <>{children}</>
 }
 
-const App = () => (
-  <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route element={<PrivateRoute />}>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/novo-registro" element={<NovoRegistro />} />
-              <Route path="/historico" element={<Historico />} />
-              <Route path="/erro/:id" element={<ErroDetalhes />} />
-              <Route
-                path="/configuracoes"
-                element={
-                  <div className="p-8 text-center text-muted-foreground">
-                    Página de configurações em construção.
-                  </div>
-                }
-              />
-            </Route>
+          <Route
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/" element={<IndexPage />} />
+            <Route path="/historico" element={<HistoricoPage />} />
           </Route>
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </TooltipProvider>
-    </AuthProvider>
-  </BrowserRouter>
-)
-
-export default App
+      </AuthProvider>
+    </BrowserRouter>
+  )
+}

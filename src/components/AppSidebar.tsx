@@ -11,13 +11,12 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import { LayoutDashboard, ListTodo, PlusCircle, Settings, MessageSquareWarning } from 'lucide-react'
+import { LayoutDashboard, ListTodo, PlusCircle, MessageSquareWarning } from 'lucide-react'
 
 const items = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
   { title: 'Histórico de Erros', url: '/historico', icon: ListTodo },
   { title: 'Novo Registro', url: '/novo-registro', icon: PlusCircle },
-  { title: 'Configurações', url: '/configuracoes', icon: Settings },
 ]
 
 export function AppSidebar() {
@@ -32,9 +31,14 @@ export function AppSidebar() {
             <MessageSquareWarning className="w-5 h-5 text-white" />
           </div>
           {state === 'expanded' && (
-            <span className="font-semibold text-lg tracking-tight truncate text-foreground">
-              Agent<span className="font-light opacity-70">Pro</span>
-            </span>
+            <div className="flex flex-col">
+              <span className="font-semibold text-lg tracking-tight truncate text-foreground leading-none mb-1">
+                Agent<span className="font-light opacity-70">Pro</span>
+              </span>
+              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/80">
+                PRN - MEDimagem
+              </span>
+            </div>
           )}
         </div>
       </SidebarHeader>

@@ -8,15 +8,21 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
 export function Login() {
-  const [email, setEmail] = useState('samuelklausfischer@hotmail.com')
-  const [password, setPassword] = useState('Skip@Pass')
+  const [identity, setIdentity] = useState('')
+  const [password, setPassword] = useState('')
   const { signIn, loading } = useAuth()
   const navigate = useNavigate()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     if (loading) return
-    const { error } = await signIn(email, password)
+
+    let loginIdentity = identity.trim()
+    if (!loginIdentity.includes('@')) {
+      loginIdentity = loginIdentity.replace(/\s+/g, '_').toLowerCase()
+    }
+
+    const { error } = await signIn(loginIdentity, password)
     if (error) {
       toast.error('Erro ao fazer login. Verifique suas credenciais.')
     } else {
@@ -38,14 +44,15 @@ export function Login() {
           <CardDescription>Faça login para acessar o painel de controle</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4" noValidate>
             <div className="space-y-2">
               <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="Usuário ou Email (ex: Paulo novack)"
+                value={identity}
+                onChange={(e) => setIdentity(e.target.value)}
                 required
+                autoComplete="username"
                 className="bg-background"
               />
             </div>
