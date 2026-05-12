@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
 export function Login() {
-  const [email, setEmail] = useState('samuelklausfischer@hotmail.com')
+  const [identity, setIdentity] = useState('samuelklausfischer@hotmail.com')
   const [password, setPassword] = useState('Skip@Pass')
   const { signIn, loading } = useAuth()
   const navigate = useNavigate()
@@ -16,7 +16,13 @@ export function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     if (loading) return
-    const { error } = await signIn(email, password)
+
+    let loginIdentity = identity.trim()
+    if (!loginIdentity.includes('@')) {
+      loginIdentity = loginIdentity.replace(/\s+/g, '').toLowerCase()
+    }
+
+    const { error } = await signIn(loginIdentity, password)
     if (error) {
       toast.error('Erro ao fazer login. Verifique suas credenciais.')
     } else {
@@ -41,10 +47,10 @@ export function Login() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="Email ou Usuário (ex: Paulo novack)"
+                value={identity}
+                onChange={(e) => setIdentity(e.target.value)}
                 required
                 className="bg-background"
               />
