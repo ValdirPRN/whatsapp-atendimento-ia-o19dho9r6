@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { UploadCloud, X, Send, Image as ImageIcon } from 'lucide-react'
+import { UploadCloud, X, Send, Image as ImageIcon, CheckCircle } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -17,8 +17,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { mockErrors } from '@/lib/mock-data'
-import { AIError } from '@/lib/types'
 import {
   Select,
   SelectContent,
@@ -29,31 +27,35 @@ import {
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useToast } from '@/components/ui/use-toast'
+import { useAuth } from '@/hooks/use-auth'
+import pb from '@/lib/pocketbase/client'
 
 const formSchema = z.object({
   title: z.string().min(5, 'O título deve ter pelo menos 5 caracteres.'),
-  context: z.string().min(20, 'Descreva com mais detalhes o que ocorreu (mín. 20 caracteres).'),
-  aiErrorDescription: z.string().min(5, 'Descreva o que a IA fez de errado.'),
-  expectedBehavior: z.string().min(5, 'Descreva o que a IA deveria ter feito.'),
-  technicalNotes: z.string().optional(),
+  context: z.string().optional().or(z.literal('')),
+  actual_behavior: z.string().min(5, 'Descreva o que a IA fez de errado.'),
+  expected_behavior: z.string().min(5, 'Descreva o que a IA deveria ter feito.'),
+  technical_notes: z.string().optional().or(z.literal('')),
   category: z.string().min(1, 'Selecione uma categoria.'),
   severity: z.string().min(1, 'Selecione a prioridade.'),
 })
 
 export default function NovoRegistro() {
   const [images, setImages] = useState<File[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { toast } = useToast()
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
       context: '',
-      aiErrorDescription: '',
-      expectedBehavior: '',
-      technicalNotes: '',
+      actual_behavior: '',
+      expected_behavior: '',
+      technical_notes: '',
       category: '',
       severity: 'Média',
     },
@@ -70,44 +72,47 @@ export default function NovoRegistro() {
     setImages((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    const newError: AIError = {
-      id: `ERR-${1043 + mockErrors.length}`,
-      title: values.title,
-      context: values.context,
-      aiErrorDescription: values.aiErrorDescription,
-      expectedBehavior: values.expectedBehavior,
-      technicalNotes: values.technicalNotes,
-      category: values.category as any,
-      severity: values.severity as any,
-      status: 'Reportado',
-      agent: 'Você',
-      date: new Date().toISOString(),
-      images: images.map((file) => URL.createObjectURL(file)),
-      timeline: [
-        {
-          id: Math.random().toString(),
-          date: new Date().toISOString(),
-          action: 'Erro reportado',
-          user: 'Você',
-        },
-      ],
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsSubmitting(true)
+    try {
+      const formData = new FormData()
+      formData.append('title', values.title)
+      if (values.context) formData.append('context', values.context)
+      formData.append('category', values.category)
+      formData.append('actual_behavior', values.actual_behavior)
+      formData.append('expected_behavior', values.expected_behavior)
+      if (values.technical_notes) formData.append('technical_notes', values.technical_notes)
+      formData.append('severity', values.severity)
+      formData.append('status', 'Reportado')
+      formData.append('user_id', user?.id || '')
+
+      images.forEach((file) => {
+        formData.append('images', file)
+      })
+
+      await pb.collection('reports').create(formData)
+
+      toast({
+        title: 'Registro enviado com sucesso!',
+        description: 'O erro foi catalogado de forma segura no banco de dados.',
+      })
+
+      setTimeout(() => {
+        navigate('/historico')
+      }, 1500)
+    } catch (error) {
+      console.error(error)
+      toast({
+        title: 'Erro ao salvar registro',
+        description: 'Ocorreu um erro ao enviar os dados. Tente novamente.',
+        variant: 'destructive',
+      })
+      setIsSubmitting(false)
     }
-
-    mockErrors.unshift(newError)
-
-    toast({
-      title: 'Registro enviado com sucesso!',
-      description: 'O erro foi catalogado temporariamente na sessão local.',
-    })
-
-    setTimeout(() => {
-      navigate('/historico')
-    }, 1500)
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in-up">
+    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in-up pb-10">
       <div className="space-y-1">
         <h2 className="text-2xl font-bold tracking-tight">Relatar Novo Erro</h2>
         <p className="text-muted-foreground">
@@ -156,13 +161,12 @@ export default function NovoRegistro() {
                             Filtro de etiquetas do WhatsApp
                           </SelectItem>
                           <SelectItem value="Triagem da conversa">Triagem da conversa</SelectItem>
-                          <SelectItem value="Mensagens automáticas da IA">
-                            Mensagens automáticas da IA
+                          <SelectItem value="Mensagens automáticas">
+                            Mensagens automáticas
                           </SelectItem>
-                          <SelectItem value="Erros sobre exames lidos de maneira errada">
-                            Erros sobre exames lidos de maneira errada
+                          <SelectItem value="Erro na leitura de exames">
+                            Erro na leitura de exames
                           </SelectItem>
-                          <SelectItem value="Outro">Outro</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -223,10 +227,10 @@ export default function NovoRegistro() {
 
               <FormField
                 control={form.control}
-                name="aiErrorDescription"
+                name="actual_behavior"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>O que a IA fez de errado</FormLabel>
+                    <FormLabel>Comportamento Real (O que a IA fez)</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Descreva exatamente o comportamento incorreto da IA..."
@@ -241,10 +245,10 @@ export default function NovoRegistro() {
 
               <FormField
                 control={form.control}
-                name="expectedBehavior"
+                name="expected_behavior"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>O que a IA deveria ter feito</FormLabel>
+                    <FormLabel>Comportamento Esperado (O que deveria ter ocorrido)</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Descreva o que era esperado que a IA fizesse nesta situação..."
@@ -262,7 +266,7 @@ export default function NovoRegistro() {
                 name="context"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descrição e Contexto da Conversa</FormLabel>
+                    <FormLabel>Descrição e Contexto da Conversa (Opcional)</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Descreva o que o cliente enviou e qual foi a falha na IA do AgentPro..."
@@ -280,7 +284,7 @@ export default function NovoRegistro() {
 
               <FormField
                 control={form.control}
-                name="technicalNotes"
+                name="technical_notes"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Notas Técnicas (Opcional)</FormLabel>
@@ -359,11 +363,22 @@ export default function NovoRegistro() {
           </Card>
 
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={() => navigate(-1)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate(-1)}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
-            <Button type="submit" className="shadow-md">
-              <Send className="w-4 h-4 mr-2" /> Salvar Registro
+            <Button type="submit" className="shadow-md" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <span className="flex items-center">Processando...</span>
+              ) : (
+                <span className="flex items-center">
+                  <Send className="w-4 h-4 mr-2" /> Salvar Registro
+                </span>
+              )}
             </Button>
           </div>
         </form>

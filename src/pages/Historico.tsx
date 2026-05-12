@@ -1,15 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  Calendar,
-  Filter,
-  MoreHorizontal,
-  FileText,
-  ArrowRight,
-  Image as ImageIcon,
-} from 'lucide-react'
+import { Calendar, Filter, MoreHorizontal, FileText, Image as ImageIcon } from 'lucide-react'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Table,
   TableBody,
@@ -34,15 +27,45 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-import { mockErrors } from '@/lib/mock-data'
-import { AIError } from '@/lib/types'
+import { useRealtime } from '@/hooks/use-realtime'
+import pb from '@/lib/pocketbase/client'
+import { ReportRecord } from '@/lib/types'
 
 export default function Historico() {
+  const [reports, setReports] = useState<ReportRecord[]>([])
+  const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState<string>('Todos')
 
-  const filteredErrors = mockErrors.filter((error) =>
+  const fetchReports = async () => {
+    try {
+      const records = await pb.collection('reports').getFullList<ReportRecord>({
+        sort: '-created',
+        expand: 'user_id',
+      })
+      setReports(records)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchReports()
+  }, [])
+
+  useRealtime('reports', () => {
+    fetchReports()
+  })
+
+  const filteredErrors = reports.filter((error) =>
     filterStatus === 'Todos' ? true : error.status === filterStatus,
   )
+
+  const isNew = (dateStr: string) => {
+    const diff = new Date().getTime() - new Date(dateStr).getTime()
+    return diff < 24 * 60 * 60 * 1000
+  }
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -91,7 +114,7 @@ export default function Historico() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Histórico de Erros</h2>
           <p className="text-muted-foreground text-sm">
-            Gerencie e acompanhe todos os registros de anomalias do AgentPro.
+            Gerencie e acompanhe todos os registros de anomalias do AgentPro em tempo real.
           </p>
         </div>
 
@@ -122,92 +145,115 @@ export default function Historico() {
               <TableRow>
                 <TableHead className="w-[100px]">ID</TableHead>
                 <TableHead>Problema & Contexto</TableHead>
+                <TableHead className="hidden xl:table-cell">Comportamento Real</TableHead>
+                <TableHead className="hidden xl:table-cell">Comportamento Esperado</TableHead>
                 <TableHead className="hidden lg:table-cell">Categoria</TableHead>
                 <TableHead>Prioridade</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="hidden md:table-cell">Data</TableHead>
-                <TableHead className="hidden md:table-cell">Agente</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredErrors.map((error: AIError) => (
-                <TableRow key={error.id} className="group hover:bg-muted/20 transition-colors">
-                  <TableCell className="font-mono text-xs font-medium text-primary align-top pt-4">
-                    <Link to={`/erro/${error.id}`}>{error.id}</Link>
-                  </TableCell>
-                  <TableCell className="max-w-[300px] sm:max-w-[400px]">
-                    <div className="flex items-start gap-3">
-                      {error.images && error.images.length > 0 ? (
-                        <div className="h-12 w-12 shrink-0 rounded-md overflow-hidden bg-muted border border-border flex items-center justify-center">
-                          <img
-                            src={error.images[0]}
-                            alt="Thumbnail"
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="h-12 w-12 shrink-0 rounded-md bg-muted border border-border flex items-center justify-center">
-                          <ImageIcon className="h-5 w-5 text-muted-foreground/50" />
-                        </div>
-                      )}
-                      <div className="flex flex-col space-y-1 overflow-hidden">
-                        <Link
-                          to={`/erro/${error.id}`}
-                          className="font-medium group-hover:text-primary transition-colors truncate"
-                        >
-                          {error.title}
-                        </Link>
-                        <span className="text-xs text-muted-foreground line-clamp-2">
-                          {error.context}
-                        </span>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden lg:table-cell align-top pt-4">
-                    <span className="text-sm">{error.category}</span>
-                  </TableCell>
-                  <TableCell className="align-top pt-4">
-                    <Badge
-                      variant="secondary"
-                      className={`${getSeverityColor(error.severity)} border-transparent hover:bg-opacity-80`}
-                    >
-                      {error.severity}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="align-top pt-4">{getStatusBadge(error.status)}</TableCell>
-                  <TableCell className="hidden md:table-cell text-muted-foreground text-sm align-top pt-4">
-                    {new Date(error.date).toLocaleDateString('pt-BR')}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-sm align-top pt-4">
-                    {error.agent}
-                  </TableCell>
-                  <TableCell className="align-top pt-4">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Abrir menu</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link to={`/erro/${error.id}`} className="flex items-center">
-                            <FileText className="mr-2 h-4 w-4" /> Ver Detalhes
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>Marcar como Em Análise</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
+                    Carregando registros...
                   </TableCell>
                 </TableRow>
-              ))}
-              {filteredErrors.length === 0 && (
+              ) : filteredErrors.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
+                  <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
                     Nenhum registro encontrado.
                   </TableCell>
                 </TableRow>
+              ) : (
+                filteredErrors.map((error: ReportRecord) => (
+                  <TableRow key={error.id} className="group hover:bg-muted/20 transition-colors">
+                    <TableCell className="font-mono text-xs font-medium text-primary align-top pt-4">
+                      <Link to={`/erro/${error.id}`}>{error.id}</Link>
+                    </TableCell>
+                    <TableCell className="max-w-[250px] sm:max-w-[300px]">
+                      <div className="flex items-start gap-3">
+                        {error.images && error.images.length > 0 ? (
+                          <div className="h-12 w-12 shrink-0 rounded-md overflow-hidden bg-muted border border-border flex items-center justify-center">
+                            <img
+                              src={pb.files.getURL(error as any, error.images[0], {
+                                thumb: '100x100',
+                              })}
+                              alt="Thumbnail"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="h-12 w-12 shrink-0 rounded-md bg-muted border border-border flex items-center justify-center">
+                            <ImageIcon className="h-5 w-5 text-muted-foreground/50" />
+                          </div>
+                        )}
+                        <div className="flex flex-col space-y-1 overflow-hidden">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Link
+                              to={`/erro/${error.id}`}
+                              className="font-medium group-hover:text-primary transition-colors truncate block max-w-full"
+                            >
+                              {error.title || 'Sem título'}
+                            </Link>
+                            {isNew(error.created) && (
+                              <Badge className="h-4 text-[9px] px-1 bg-blue-500 hover:bg-blue-600 border-none shrink-0">
+                                NOVO
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground line-clamp-2">
+                            {error.context || error.actual_behavior}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden xl:table-cell align-top pt-4 max-w-[200px]">
+                      <span className="text-xs text-muted-foreground line-clamp-3">
+                        {error.actual_behavior}
+                      </span>
+                    </TableCell>
+                    <TableCell className="hidden xl:table-cell align-top pt-4 max-w-[200px]">
+                      <span className="text-xs text-muted-foreground line-clamp-3">
+                        {error.expected_behavior}
+                      </span>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell align-top pt-4">
+                      <span className="text-sm">{error.category}</span>
+                    </TableCell>
+                    <TableCell className="align-top pt-4">
+                      <Badge
+                        variant="secondary"
+                        className={`${getSeverityColor(error.severity)} border-transparent hover:bg-opacity-80`}
+                      >
+                        {error.severity}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="align-top pt-4">{getStatusBadge(error.status)}</TableCell>
+                    <TableCell className="hidden md:table-cell text-muted-foreground text-sm align-top pt-4">
+                      {new Date(error.created).toLocaleDateString('pt-BR')}
+                    </TableCell>
+                    <TableCell className="align-top pt-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Abrir menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link to={`/erro/${error.id}`} className="flex items-center">
+                              <FileText className="mr-2 h-4 w-4" /> Ver Detalhes
+                            </Link>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
             </TableBody>
           </Table>

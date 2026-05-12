@@ -1,13 +1,13 @@
 export type ErrorCategory =
   | 'Filtro de etiquetas do WhatsApp'
   | 'Triagem da conversa'
-  | 'Mensagens automáticas da IA'
-  | 'Erros sobre exames lidos de maneira errada'
-  | 'Outro'
+  | 'Mensagens automáticas'
+  | 'Erro na leitura de exames'
+  | string
 
-export type ErrorSeverity = 'Baixa' | 'Média' | 'Alta' | 'Crítica'
+export type ErrorSeverity = 'Baixa' | 'Média' | 'Alta' | 'Crítica' | string
 
-export type ErrorStatus = 'Reportado' | 'Em Análise' | 'Corrigido' | 'Ignorado'
+export type ErrorStatus = 'Reportado' | 'Em Análise' | 'Corrigido' | 'Ignorado' | string
 
 export interface TimelineEvent {
   id: string
@@ -17,21 +17,34 @@ export interface TimelineEvent {
   notes?: string
 }
 
-export interface AIError {
+export interface ReportRecord {
   id: string
   title: string
   context: string
-  aiErrorDescription?: string
-  expectedBehavior?: string
-  technicalNotes?: string
+  actual_behavior: string
+  expected_behavior: string
+  technical_notes?: string
   category: ErrorCategory
   severity: ErrorSeverity
   status: ErrorStatus
-  agent: string
-  date: string
+  user_id: string
   images: string[]
-  timeline: TimelineEvent[]
+  created: string
+  updated: string
+  expand?: {
+    user_id?: {
+      id: string
+      name: string
+      email: string
+      avatar?: string
+    }
+  }
+  // Optional backward compatibility
+  agent?: string
+  timeline?: TimelineEvent[]
 }
+
+export type AIError = ReportRecord
 
 export interface DailyStat {
   date: string

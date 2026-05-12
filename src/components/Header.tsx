@@ -1,9 +1,16 @@
-import { Bell, Search, Menu } from 'lucide-react'
+import { Bell, Search, Menu, LogOut } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useSidebar } from '@/components/ui/sidebar'
 import { useLocation } from 'react-router-dom'
+import { useAuth } from '@/hooks/use-auth'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 const routeTitles: Record<string, string> = {
   '/': 'Painel de Controle',
@@ -15,6 +22,7 @@ const routeTitles: Record<string, string> = {
 export function Header() {
   const { toggleSidebar } = useSidebar()
   const location = useLocation()
+  const { user, signOut } = useAuth()
 
   // Try to match exact route or fallback to details
   const title =
@@ -47,13 +55,28 @@ export function Header() {
           <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full border-2 border-background"></span>
         </Button>
 
-        <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-transparent hover:ring-primary transition-all">
-          <AvatarImage
-            src="https://img.usecurling.com/ppl/thumbnail?gender=female&seed=1"
-            alt="Agent"
-          />
-          <AvatarFallback>AS</AvatarFallback>
-        </Avatar>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-transparent hover:ring-primary transition-all">
+              {user?.avatar ? (
+                <AvatarImage src={user.avatar} alt={user?.name || 'Agent'} />
+              ) : (
+                <AvatarFallback className="bg-primary/10 text-primary">
+                  {user?.name ? user.name.substring(0, 2).toUpperCase() : 'U'}
+                </AvatarFallback>
+              )}
+            </Avatar>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={signOut}
+              className="cursor-pointer text-destructive focus:text-destructive"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sair
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   )

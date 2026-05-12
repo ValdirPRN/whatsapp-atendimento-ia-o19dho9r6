@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -15,18 +16,32 @@ import {
   Terminal,
 } from 'lucide-react'
 
-import { mockErrors } from '@/lib/mock-data'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import pb from '@/lib/pocketbase/client'
+import { ReportRecord } from '@/lib/types'
 
 export default function ErroDetalhes() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [error, setError] = useState<ReportRecord | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const error = mockErrors.find((e) => e.id === id)
+  useEffect(() => {
+    if (!id) return
+    pb.collection('reports')
+      .getOne<ReportRecord>(id, { expand: 'user_id' })
+      .then((res) => setError(res))
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [id])
+
+  if (loading) {
+    return <div className="p-8 text-center text-muted-foreground">Carregando detalhes...</div>
+  }
 
   if (!error) {
     return (
@@ -47,6 +62,24 @@ export default function ErroDetalhes() {
       default:
         return 'bg-muted text-muted-foreground'
     }
+  }
+
+  const timeline = [
+    {
+      id: 't1',
+      action: 'Erro reportado',
+      user: error.expand?.user_id?.name || 'Sistema',
+      date: error.created,
+    },
+  ]
+
+  if (error.updated && error.updated !== error.created) {
+    timeline.push({
+      id: 't2',
+      action: `Atualizado (${error.status})`,
+      user: 'Sistema',
+      date: error.updated,
+    })
   }
 
   return (
@@ -79,21 +112,41 @@ export default function ErroDetalhes() {
             <CardContent className="pt-6">
               <div className="space-y-6">
                 <div>
-                  <h4 className="text-sm font-medium mb-2 text-muted-foreground">
-                    Contexto da Conversa
+                  <h4 className="text-sm font-medium mb-2 text-muted-foreground flex items-center gap-1.5">
+                    <AlertTriangle className="h-4 w-4" /> Comportamento Real (O que a IA fez)
                   </h4>
-                  <div className="bg-muted/30 p-4 rounded-lg border border-border/50 text-foreground leading-relaxed">
-                    {error.context}
+                  <div className="bg-red-500/10 text-red-800 dark:text-red-300 p-4 rounded-lg border border-red-500/20 text-sm leading-relaxed whitespace-pre-wrap">
+                    {error.actual_behavior}
                   </div>
                 </div>
 
-                {error.technicalNotes && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2 text-muted-foreground flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4" /> Comportamento Esperado
+                  </h4>
+                  <div className="bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 p-4 rounded-lg border border-emerald-500/20 text-sm leading-relaxed whitespace-pre-wrap">
+                    {error.expected_behavior}
+                  </div>
+                </div>
+
+                {error.context && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-2 text-muted-foreground">
+                      Contexto da Conversa
+                    </h4>
+                    <div className="bg-muted/30 p-4 rounded-lg border border-border/50 text-foreground leading-relaxed text-sm">
+                      {error.context}
+                    </div>
+                  </div>
+                )}
+
+                {error.technical_notes && (
                   <div>
                     <h4 className="text-sm font-medium mb-2 text-muted-foreground flex items-center gap-1.5">
                       <Terminal className="h-4 w-4" /> Notas Técnicas
                     </h4>
                     <div className="bg-slate-900 dark:bg-black/50 p-4 rounded-lg border border-border/50 text-slate-300 font-mono text-sm leading-relaxed whitespace-pre-wrap">
-                      {error.technicalNotes}
+                      {error.technical_notes}
                     </div>
                   </div>
                 )}
@@ -118,14 +171,14 @@ export default function ErroDetalhes() {
                   <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                     <User className="h-3 w-3" /> Reportado por
                   </p>
-                  <p className="font-medium text-sm">{error.agent}</p>
+                  <p className="font-medium text-sm">{error.expand?.user_id?.name || 'Sistema'}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                     <Clock className="h-3 w-3" /> Data
                   </p>
                   <p className="font-medium text-sm">
-                    {format(new Date(error.date), 'dd MMM yyyy', { locale: ptBR })}
+                    {format(new Date(error.created), 'dd MMM yyyy', { locale: ptBR })}
                   </p>
                 </div>
               </div>
@@ -142,29 +195,32 @@ export default function ErroDetalhes() {
             <CardContent className="pt-6">
               {error.images && error.images.length > 0 ? (
                 <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
-                  {error.images.map((img, idx) => (
-                    <Dialog key={idx}>
-                      <DialogTrigger asChild>
-                        <div className="relative group cursor-pointer shrink-0 w-48 h-80 rounded-xl overflow-hidden border border-border shadow-sm snap-center">
-                          <img
-                            src={img}
-                            alt={`Evidência ${idx + 1}`}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                            <ZoomIn className="text-white h-8 w-8" />
+                  {error.images.map((imgName, idx) => {
+                    const imgUrl = pb.files.getURL(error as any, imgName)
+                    return (
+                      <Dialog key={idx}>
+                        <DialogTrigger asChild>
+                          <div className="relative group cursor-pointer shrink-0 w-48 h-80 rounded-xl overflow-hidden border border-border shadow-sm snap-center">
+                            <img
+                              src={imgUrl}
+                              alt={`Evidência ${idx + 1}`}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                              <ZoomIn className="text-white h-8 w-8" />
+                            </div>
                           </div>
-                        </div>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-[90vw] md:max-w-4xl p-1 bg-black/95 border-none h-[90vh] flex items-center justify-center">
-                        <img
-                          src={img}
-                          alt="Zoom"
-                          className="max-w-full max-h-full object-contain"
-                        />
-                      </DialogContent>
-                    </Dialog>
-                  ))}
+                        </DialogTrigger>
+                        <DialogContent className="max-w-[90vw] md:max-w-4xl p-1 bg-black/95 border-none h-[90vh] flex items-center justify-center">
+                          <img
+                            src={imgUrl}
+                            alt="Zoom"
+                            className="max-w-full max-h-full object-contain"
+                          />
+                        </DialogContent>
+                      </Dialog>
+                    )
+                  })}
                 </div>
               ) : (
                 <div className="py-8 text-center text-muted-foreground bg-muted/20 rounded-lg border border-dashed border-border">
@@ -183,14 +239,14 @@ export default function ErroDetalhes() {
             </CardHeader>
             <CardContent>
               <div className="space-y-6 relative before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
-                {error.timeline.map((event, index) => (
+                {timeline.map((event, index) => (
                   <div
                     key={event.id}
                     className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active"
                   >
                     {/* Marker */}
                     <div className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-background bg-muted text-muted-foreground shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 relative">
-                      {index === error.timeline.length - 1 && event.action.includes('Corrigido') ? (
+                      {index === timeline.length - 1 && event.action.includes('Corrigido') ? (
                         <CheckCircle2 className="h-3 w-3 text-emerald-500" />
                       ) : (
                         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
@@ -208,11 +264,6 @@ export default function ErroDetalhes() {
                             {format(new Date(event.date), 'HH:mm')}
                           </span>
                         </div>
-                        {event.notes && (
-                          <div className="mt-2 text-sm text-foreground/80 bg-muted/40 p-2 rounded-md italic border-l-2 border-primary">
-                            "{event.notes}"
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -224,9 +275,6 @@ export default function ErroDetalhes() {
               <div className="space-y-3">
                 <Button className="w-full justify-between" variant="outline">
                   Atualizar Status <ChevronRight className="h-4 w-4" />
-                </Button>
-                <Button className="w-full justify-between" variant="outline">
-                  Adicionar Nota <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
             </CardContent>
