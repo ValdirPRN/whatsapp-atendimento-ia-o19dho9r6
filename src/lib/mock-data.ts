@@ -3,9 +3,9 @@ import { AIError, DailyStat } from './types'
 export const mockErrors: AIError[] = [
   {
     id: 'ERR-1042',
-    title: 'IA ofereceu desconto não autorizado',
+    title: 'AgentPro ofereceu desconto não autorizado',
     context:
-      'O cliente perguntou sobre promoções e a IA inventou um cupom de 50% de desconto chamado "METADEDOPRECO" que não existe em nossa base.',
+      'O cliente perguntou sobre promoções e o AgentPro inventou um cupom de 50% de desconto chamado "METADEDOPRECO" que não existe em nossa base.',
     category: 'Alucinação de Produto',
     severity: 'Alta',
     status: 'Em Análise',
@@ -30,7 +30,7 @@ export const mockErrors: AIError[] = [
     id: 'ERR-1041',
     title: 'Looping perguntando o nome do cliente',
     context:
-      'A IA não reconheceu que o cliente já havia dito o nome na mensagem anterior e perguntou o nome 3 vezes seguidas.',
+      'O AgentPro não reconheceu que o cliente já havia dito o nome na mensagem anterior e perguntou o nome 3 vezes seguidas.',
     category: 'Loop Infinito',
     severity: 'Média',
     status: 'Corrigido',
@@ -43,7 +43,7 @@ export const mockErrors: AIError[] = [
         id: 't4',
         date: '2023-10-23T16:20:00Z',
         action: 'Status alterado para Corrigido',
-        user: 'Equipe de IA',
+        user: 'Equipe AgentPro',
         notes: 'Ajuste feito no rastreamento de entidades da sessão.',
       },
     ],
@@ -52,7 +52,7 @@ export const mockErrors: AIError[] = [
     id: 'ERR-1040',
     title: 'Tom muito ríspido após reclamação',
     context:
-      'Cliente reclamou do atraso na entrega e a IA respondeu de forma robótica e insensível, sem empatia.',
+      'Cliente reclamou do atraso na entrega e o AgentPro respondeu de forma robótica e insensível, sem empatia.',
     category: 'Tom Inadequado',
     severity: 'Alta',
     status: 'Reportado',
@@ -66,7 +66,8 @@ export const mockErrors: AIError[] = [
   {
     id: 'ERR-1039',
     title: 'Falha ao identificar intenção de cancelamento',
-    context: 'Cliente digitou "quero cancelar minha conta" e a IA ofereceu um upgrade de plano.',
+    context:
+      'Cliente digitou "quero cancelar minha conta" e o AgentPro ofereceu um upgrade de plano.',
     category: 'Falha de Contexto',
     severity: 'Crítica',
     status: 'Em Análise',
@@ -80,7 +81,7 @@ export const mockErrors: AIError[] = [
   {
     id: 'ERR-1038',
     title: 'Resposta em espanhol para cliente brasileiro',
-    context: 'Do nada a IA começou a responder em espanhol no meio do atendimento.',
+    context: 'Do nada o AgentPro começou a responder em espanhol no meio do atendimento.',
     category: 'Resposta Incorreta',
     severity: 'Média',
     status: 'Corrigido',

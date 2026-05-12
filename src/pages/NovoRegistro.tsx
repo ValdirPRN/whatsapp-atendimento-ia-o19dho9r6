@@ -78,7 +78,7 @@ export default function NovoRegistro() {
       <div className="space-y-1">
         <h2 className="text-2xl font-bold tracking-tight">Relatar Novo Erro</h2>
         <p className="text-muted-foreground">
-          Forneça detalhes e evidências sobre a falha da IA para ajudar a equipe a corrigir o
+          Forneça detalhes e evidências sobre a falha do AgentPro para ajudar a equipe a corrigir o
           comportamento.
         </p>
       </div>
@@ -95,7 +95,7 @@ export default function NovoRegistro() {
                     <FormLabel>Título do Problema</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ex: IA respondeu em outro idioma"
+                        placeholder="Ex: AgentPro respondeu em outro idioma"
                         {...field}
                         className="bg-background"
                       />
@@ -193,7 +193,7 @@ export default function NovoRegistro() {
                     <FormLabel>Descrição e Contexto</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Descreva o que o cliente enviou e qual foi a resposta incorreta da IA..."
+                        placeholder="Descreva o que o cliente enviou e qual foi a resposta incorreta do AgentPro..."
                         className="min-h-[120px] bg-background resize-y"
                         {...field}
                       />

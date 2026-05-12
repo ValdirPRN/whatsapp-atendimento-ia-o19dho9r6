@@ -19,7 +19,7 @@ export function Header() {
   // Try to match exact route or fallback to details
   const title =
     routeTitles[location.pathname] ||
-    (location.pathname.startsWith('/erro/') ? 'Detalhes do Erro' : 'ZapIA Monitor')
+    (location.pathname.startsWith('/erro/') ? 'Detalhes do Erro' : 'AgentPro')
 
   return (
     <header className="h-16 border-b border-border/50 bg-background flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40 w-full shadow-sm">

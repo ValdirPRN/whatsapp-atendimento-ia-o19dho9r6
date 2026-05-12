@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, Filter, MoreHorizontal, FileText, ArrowRight } from 'lucide-react'
+import {
+  Calendar,
+  Filter,
+  MoreHorizontal,
+  FileText,
+  ArrowRight,
+  Image as ImageIcon,
+} from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -84,7 +91,7 @@ export default function Historico() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Histórico de Erros</h2>
           <p className="text-muted-foreground text-sm">
-            Gerencie e acompanhe todos os registros de anomalias da IA.
+            Gerencie e acompanhe todos os registros de anomalias do AgentPro.
           </p>
         </div>
 
@@ -114,8 +121,8 @@ export default function Historico() {
             <TableHeader className="bg-muted/50 sticky top-0 z-10">
               <TableRow>
                 <TableHead className="w-[100px]">ID</TableHead>
-                <TableHead>Problema</TableHead>
-                <TableHead>Categoria</TableHead>
+                <TableHead>Problema & Contexto</TableHead>
+                <TableHead className="hidden lg:table-cell">Categoria</TableHead>
                 <TableHead>Prioridade</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="hidden md:table-cell">Data</TableHead>
@@ -126,21 +133,41 @@ export default function Historico() {
             <TableBody>
               {filteredErrors.map((error: AIError) => (
                 <TableRow key={error.id} className="group hover:bg-muted/20 transition-colors">
-                  <TableCell className="font-mono text-xs font-medium text-primary">
+                  <TableCell className="font-mono text-xs font-medium text-primary align-top pt-4">
                     <Link to={`/erro/${error.id}`}>{error.id}</Link>
                   </TableCell>
-                  <TableCell>
-                    <Link
-                      to={`/erro/${error.id}`}
-                      className="font-medium group-hover:text-primary transition-colors line-clamp-1"
-                    >
-                      {error.title}
-                    </Link>
+                  <TableCell className="max-w-[300px] sm:max-w-[400px]">
+                    <div className="flex items-start gap-3">
+                      {error.images && error.images.length > 0 ? (
+                        <div className="h-12 w-12 shrink-0 rounded-md overflow-hidden bg-muted border border-border flex items-center justify-center">
+                          <img
+                            src={error.images[0]}
+                            alt="Thumbnail"
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-12 w-12 shrink-0 rounded-md bg-muted border border-border flex items-center justify-center">
+                          <ImageIcon className="h-5 w-5 text-muted-foreground/50" />
+                        </div>
+                      )}
+                      <div className="flex flex-col space-y-1 overflow-hidden">
+                        <Link
+                          to={`/erro/${error.id}`}
+                          className="font-medium group-hover:text-primary transition-colors truncate"
+                        >
+                          {error.title}
+                        </Link>
+                        <span className="text-xs text-muted-foreground line-clamp-2">
+                          {error.context}
+                        </span>
+                      </div>
+                    </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden lg:table-cell align-top pt-4">
                     <span className="text-sm">{error.category}</span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="align-top pt-4">
                     <Badge
                       variant="secondary"
                       className={`${getSeverityColor(error.severity)} border-transparent hover:bg-opacity-80`}
@@ -148,12 +175,14 @@ export default function Historico() {
                       {error.severity}
                     </Badge>
                   </TableCell>
-                  <TableCell>{getStatusBadge(error.status)}</TableCell>
-                  <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
+                  <TableCell className="align-top pt-4">{getStatusBadge(error.status)}</TableCell>
+                  <TableCell className="hidden md:table-cell text-muted-foreground text-sm align-top pt-4">
                     {new Date(error.date).toLocaleDateString('pt-BR')}
                   </TableCell>
-                  <TableCell className="hidden md:table-cell text-sm">{error.agent}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell text-sm align-top pt-4">
+                    {error.agent}
+                  </TableCell>
+                  <TableCell className="align-top pt-4">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">

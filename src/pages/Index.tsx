@@ -74,7 +74,7 @@ export default function Index() {
         {/* Chart Section */}
         <Card className="lg:col-span-2 shadow-sm border-border/50 flex flex-col">
           <CardHeader>
-            <CardTitle>Desempenho da IA (Últimos 7 dias)</CardTitle>
+            <CardTitle>Desempenho do AgentPro (Últimos 7 dias)</CardTitle>
           </CardHeader>
           <CardContent className="flex-1 min-h-[300px]">
             <ChartContainer
@@ -134,8 +134,8 @@ export default function Index() {
           </div>
           <h3 className="text-xl font-semibold mb-2">Registrou uma anomalia?</h3>
           <p className="text-sm text-muted-foreground mb-6">
-            Ajude-nos a melhorar a precisão do nosso assistente virtual registrando falhas e
-            comportamentos inesperados.
+            Ajude-nos a melhorar a precisão do AgentPro registrando falhas e comportamentos
+            inesperados.
           </p>
           <Button asChild size="lg" className="w-full shadow-md hover:shadow-lg transition-all">
             <Link to="/novo-registro">

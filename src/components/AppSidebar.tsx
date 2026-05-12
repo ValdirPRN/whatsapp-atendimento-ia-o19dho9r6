@@ -33,7 +33,7 @@ export function AppSidebar() {
           </div>
           {state === 'expanded' && (
             <span className="font-semibold text-lg tracking-tight truncate text-foreground">
-              ZapIA <span className="font-light opacity-70">Monitor</span>
+              Agent<span className="font-light opacity-70">Pro</span>
             </span>
           )}
         </div>
