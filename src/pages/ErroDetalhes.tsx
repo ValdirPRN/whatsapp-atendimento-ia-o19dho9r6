@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   ChevronRight,
   ZoomIn,
+  Terminal,
 } from 'lucide-react'
 
 import { mockErrors } from '@/lib/mock-data'
@@ -76,8 +77,26 @@ export default function ErroDetalhes() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="bg-muted/30 p-4 rounded-lg border border-border/50 text-foreground leading-relaxed">
-                {error.context}
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-sm font-medium mb-2 text-muted-foreground">
+                    Contexto da Conversa
+                  </h4>
+                  <div className="bg-muted/30 p-4 rounded-lg border border-border/50 text-foreground leading-relaxed">
+                    {error.context}
+                  </div>
+                </div>
+
+                {error.technicalNotes && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-2 text-muted-foreground flex items-center gap-1.5">
+                      <Terminal className="h-4 w-4" /> Notas Técnicas
+                    </h4>
+                    <div className="bg-slate-900 dark:bg-black/50 p-4 rounded-lg border border-border/50 text-slate-300 font-mono text-sm leading-relaxed whitespace-pre-wrap">
+                      {error.technicalNotes}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">

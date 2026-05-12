@@ -64,7 +64,7 @@ export default function Index() {
             <TrendingUp className="h-4 w-4 text-indigo-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-base font-semibold mt-1">Alucinação de Produto</div>
+            <div className="text-base font-semibold mt-1">Triagem da conversa</div>
             <p className="text-xs text-muted-foreground mt-1">Representa 42% dos registros</p>
           </CardContent>
         </Card>

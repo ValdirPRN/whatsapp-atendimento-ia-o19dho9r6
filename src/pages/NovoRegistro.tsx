@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { mockErrors } from '@/lib/mock-data'
+import { AIError } from '@/lib/types'
 import {
   Select,
   SelectContent,
@@ -31,6 +33,7 @@ import { useToast } from '@/components/ui/use-toast'
 const formSchema = z.object({
   title: z.string().min(5, 'O título deve ter pelo menos 5 caracteres.'),
   context: z.string().min(20, 'Descreva com mais detalhes o que ocorreu (mín. 20 caracteres).'),
+  technicalNotes: z.string().optional(),
   category: z.string().min(1, 'Selecione uma categoria.'),
   severity: z.string().min(1, 'Selecione a prioridade.'),
 })
@@ -46,6 +49,7 @@ export default function NovoRegistro() {
     defaultValues: {
       title: '',
       context: '',
+      technicalNotes: '',
       category: '',
       severity: 'Média',
     },
@@ -63,11 +67,34 @@ export default function NovoRegistro() {
   }
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log({ ...values, images })
+    const newError: AIError = {
+      id: `ERR-${1043 + mockErrors.length}`,
+      title: values.title,
+      context: values.context,
+      technicalNotes: values.technicalNotes,
+      category: values.category as any,
+      severity: values.severity as any,
+      status: 'Reportado',
+      agent: 'Você',
+      date: new Date().toISOString(),
+      images: images.map((file) => URL.createObjectURL(file)),
+      timeline: [
+        {
+          id: Math.random().toString(),
+          date: new Date().toISOString(),
+          action: 'Erro reportado',
+          user: 'Você',
+        },
+      ],
+    }
+
+    mockErrors.unshift(newError)
+
     toast({
       title: 'Registro enviado com sucesso!',
-      description: 'O erro foi catalogado e encaminhado para análise.',
+      description: 'O erro foi catalogado temporariamente na sessão local.',
     })
+
     setTimeout(() => {
       navigate('/historico')
     }, 1500)
@@ -119,12 +146,15 @@ export default function NovoRegistro() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Resposta Incorreta">Resposta Incorreta</SelectItem>
-                          <SelectItem value="Tom Inadequado">Tom Inadequado</SelectItem>
-                          <SelectItem value="Loop Infinito">Loop Infinito</SelectItem>
-                          <SelectItem value="Falha de Contexto">Falha de Contexto</SelectItem>
-                          <SelectItem value="Alucinação de Produto">
-                            Alucinação de Produto
+                          <SelectItem value="Filtro de etiquetas do WhatsApp">
+                            Filtro de etiquetas do WhatsApp
+                          </SelectItem>
+                          <SelectItem value="Triagem da conversa">Triagem da conversa</SelectItem>
+                          <SelectItem value="Mensagens automáticas da IA">
+                            Mensagens automáticas da IA
+                          </SelectItem>
+                          <SelectItem value="Erros sobre exames lidos de maneira errada">
+                            Erros sobre exames lidos de maneira errada
                           </SelectItem>
                           <SelectItem value="Outro">Outro</SelectItem>
                         </SelectContent>
@@ -190,17 +220,35 @@ export default function NovoRegistro() {
                 name="context"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descrição e Contexto</FormLabel>
+                    <FormLabel>Descrição e Contexto da Conversa</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Descreva o que o cliente enviou e qual foi a resposta incorreta do AgentPro..."
-                        className="min-h-[120px] bg-background resize-y"
+                        placeholder="Descreva o que o cliente enviou e qual foi a falha na IA do AgentPro..."
+                        className="min-h-[100px] bg-background resize-y"
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
                       Copie e cole trechos da conversa se necessário.
                     </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="technicalNotes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notas Técnicas (Opcional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Adicione detalhes técnicos úteis (ex: comportamento esperado, ID da sessão, tipo do exame)..."
+                        className="min-h-[80px] bg-background resize-y"
+                        {...field}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

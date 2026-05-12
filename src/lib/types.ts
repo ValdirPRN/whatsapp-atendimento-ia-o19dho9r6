@@ -1,9 +1,8 @@
 export type ErrorCategory =
-  | 'Resposta Incorreta'
-  | 'Tom Inadequado'
-  | 'Loop Infinito'
-  | 'Falha de Contexto'
-  | 'Alucinação de Produto'
+  | 'Filtro de etiquetas do WhatsApp'
+  | 'Triagem da conversa'
+  | 'Mensagens automáticas da IA'
+  | 'Erros sobre exames lidos de maneira errada'
   | 'Outro'
 
 export type ErrorSeverity = 'Baixa' | 'Média' | 'Alta' | 'Crítica'
@@ -22,6 +21,7 @@ export interface AIError {
   id: string
   title: string
   context: string
+  technicalNotes?: string
   category: ErrorCategory
   severity: ErrorSeverity
   status: ErrorStatus
