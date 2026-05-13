@@ -26,7 +26,6 @@ export default function AuthPage() {
   const [loginError, setLoginError] = useState(false)
 
   const [name, setName] = useState('')
-  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [regPassword, setRegPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -82,7 +81,6 @@ export default function AuthPage() {
     setIsSubmitting(true)
 
     const trimmedName = name.trim()
-    const trimmedUsername = username.trim()
     const trimmedEmail = email.trim()
 
     if (regPassword !== confirmPassword) {
@@ -99,7 +97,7 @@ export default function AuthPage() {
       return
     }
 
-    const { error } = await signUp(trimmedName, trimmedUsername, trimmedEmail, regPassword)
+    const { error } = await signUp(trimmedName, trimmedEmail, regPassword)
     if (error) {
       const errors = extractFieldErrors(error)
       if (Object.keys(errors).length > 0) {
@@ -150,12 +148,12 @@ export default function AuthPage() {
       {/* Layer 1: Content */}
       <div className="min-h-screen flex flex-col items-center justify-center relative z-10 p-4">
         <div className="mb-8 flex flex-col items-center animate-fade-in-down">
-          <img
-            src={logoImg}
-            alt="AgentPro Logo"
-            className="w-32 h-32 object-contain logo-glow cursor-pointer"
-          />
-          <h1 className="text-4xl font-bold tracking-tight text-white mt-4">
+          <div className="relative rounded-full p-[1px] bg-gradient-to-br from-cyan-400 to-orange-500 logo-glow cursor-pointer mb-4">
+            <div className="bg-black/80 rounded-full p-2 backdrop-blur-xl flex items-center justify-center">
+              <img src={logoImg} alt="AgentPro Logo" className="w-28 h-28 object-contain" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold tracking-tight text-white">
             Agent<span className="font-light text-cyan-400">Pro</span>
           </h1>
         </div>
@@ -257,24 +255,6 @@ export default function AuthPage() {
                     />
                     {fieldErrors.name && (
                       <p className="text-xs text-red-400 font-medium">{fieldErrors.name}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="username" className="text-white/90">
-                      Usuário
-                    </Label>
-                    <Input
-                      id="username"
-                      type="text"
-                      placeholder="joaosilva"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
-                      className={`bg-black/20 border-white/10 text-white placeholder:text-white/40 focus:bg-black/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all backdrop-blur-sm shadow-inner ${fieldErrors.username ? 'border-red-500 focus-visible:ring-red-500 focus:ring-1 focus:ring-red-500' : ''}`}
-                    />
-                    {fieldErrors.username && (
-                      <p className="text-xs text-red-400 font-medium">{fieldErrors.username}</p>
                     )}
                   </div>
 
