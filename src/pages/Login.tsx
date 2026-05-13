@@ -3,19 +3,22 @@ import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { MessageSquareWarning } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { MessageSquareWarning, Loader2 } from 'lucide-react'
+import { useNavigate, Navigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
 export function Login() {
   const [identity, setIdentity] = useState('')
   const [password, setPassword] = useState('')
-  const { signIn, loading } = useAuth()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { user, signIn, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (loading) return
+    if (isSubmitting || authLoading) return
+
+    setIsSubmitting(true)
 
     let loginIdentity = identity.trim()
     if (!loginIdentity.includes('@')) {
@@ -25,10 +28,23 @@ export function Login() {
     const { error } = await signIn(loginIdentity, password)
     if (error) {
       toast.error('Falha na autenticação. Verifique seu usuário e senha.')
+      setIsSubmitting(false)
     } else {
       toast.success('Login realizado com sucesso!')
-      navigate('/')
+      navigate('/', { replace: true })
     }
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (user) {
+    return <Navigate to="/" replace />
   }
 
   return (
@@ -66,8 +82,15 @@ export function Login() {
                 className="bg-background"
               />
             </div>
-            <Button type="submit" className="w-full shadow-sm" disabled={loading}>
-              {loading ? 'Entrando...' : 'Entrar'}
+            <Button type="submit" className="w-full shadow-sm" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Entrando...
+                </>
+              ) : (
+                'Entrar'
+              )}
             </Button>
           </form>
         </CardContent>
