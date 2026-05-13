@@ -3,6 +3,11 @@ migrate(
     const users = app.findCollectionByNameOrId('_pb_users_auth_')
 
     try {
+      app.findAuthRecordByEmail('_pb_users_auth_', 'joany@agentpro.local')
+      return // already seeded
+    } catch (_) {}
+
+    try {
       app.findFirstRecordByData('_pb_users_auth_', 'username', 'joany')
       return // already seeded
     } catch (_) {}
@@ -19,7 +24,7 @@ migrate(
   },
   (app) => {
     try {
-      const record = app.findFirstRecordByData('_pb_users_auth_', 'username', 'joany')
+      const record = app.findAuthRecordByEmail('_pb_users_auth_', 'joany@agentpro.local')
       app.delete(record)
     } catch (_) {}
   },
