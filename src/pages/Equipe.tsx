@@ -7,6 +7,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from 'sonner'
 import { Users, UserPlus, Shield, Trash2, Calendar, Fingerprint } from 'lucide-react'
 import {
@@ -36,7 +43,7 @@ export default function EquipePage() {
   const [loading, setLoading] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
 
-  const [formData, setFormData] = useState({ name: '', username: '', password: '' })
+  const [formData, setFormData] = useState({ name: '', username: '', password: '', role: 'membro' })
   const [submitting, setSubmitting] = useState(false)
 
   const loadUsers = async () => {
@@ -68,11 +75,11 @@ export default function EquipePage() {
         email: `${formData.username}@agentpro.local`,
         password: formData.password,
         passwordConfirm: formData.password,
-        role: 'member',
+        role: formData.role,
       })
       toast.success('Membro adicionado com sucesso!')
       setIsOpen(false)
-      setFormData({ name: '', username: '', password: '' })
+      setFormData({ name: '', username: '', password: '', role: 'membro' })
     } catch (e: any) {
       toast.error(e.message || 'Erro ao criar usuário')
     } finally {
@@ -168,6 +175,24 @@ export default function EquipePage() {
                   placeholder="Mínimo 8 caracteres"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="role" className="text-slate-300">
+                  Função
+                </Label>
+                <Select
+                  value={formData.role}
+                  onValueChange={(value) => setFormData((p) => ({ ...p, role: value }))}
+                  required
+                >
+                  <SelectTrigger className="bg-black/50 border-white/10 text-white focus:ring-cyan-500">
+                    <SelectValue placeholder="Selecione uma função" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-950 border-white/10 text-white">
+                    <SelectItem value="admin">Administrador</SelectItem>
+                    <SelectItem value="membro">Membro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <Button
                 type="submit"
                 className="w-full bg-cyan-600 hover:bg-cyan-500 text-white mt-4"
@@ -228,7 +253,11 @@ export default function EquipePage() {
                       <div className="flex items-center gap-1.5">
                         <Shield className="w-3.5 h-3.5 text-slate-500" />
                         <span className="text-slate-300 text-sm capitalize">
-                          {u.role || 'Member'}
+                          {u.role === 'admin'
+                            ? 'Administrador'
+                            : u.role === 'membro' || u.role === 'member'
+                              ? 'Membro'
+                              : u.role || 'Membro'}
                         </span>
                       </div>
                     </TableCell>
