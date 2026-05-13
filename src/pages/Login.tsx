@@ -24,7 +24,7 @@ export function Login() {
 
     const { error } = await signIn(loginIdentity, password)
     if (error) {
-      toast.error('Invalid username or password')
+      toast.error('Falha na autenticação. Verifique seu usuário e senha.')
     } else {
       toast.success('Login realizado com sucesso!')
       navigate('/')
