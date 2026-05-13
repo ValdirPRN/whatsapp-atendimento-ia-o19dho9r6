@@ -122,16 +122,19 @@ export default function Historico() {
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Button variant="outline" className="flex-1 sm:flex-none">
-            <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+          <Button
+            variant="outline"
+            className="flex-1 sm:flex-none bg-black/40 border-white/10 text-white hover:bg-white/10 hover:text-white"
+          >
+            <Calendar className="mr-2 h-4 w-4 text-slate-400" />
             <span>Últimos 30 dias</span>
           </Button>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-[180px] flex-1 sm:flex-none">
-              <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+            <SelectTrigger className="w-[180px] flex-1 sm:flex-none bg-black/40 border-white/10 text-white focus:ring-cyan-500">
+              <Filter className="mr-2 h-4 w-4 text-slate-400" />
               <SelectValue placeholder="Filtrar por Status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-black/90 border-white/10 text-white">
               <SelectItem value="Todos">Todos os Status</SelectItem>
               <SelectItem value="Reportado">Reportado</SelectItem>
               <SelectItem value="Em Análise">Em Análise</SelectItem>
@@ -141,10 +144,10 @@ export default function Historico() {
         </div>
       </div>
 
-      <Card className="flex-1 shadow-2xl border-white/10 bg-black/60 backdrop-blur-2xl flex flex-col overflow-hidden">
+      <Card className="flex-1 shadow-2xl border-white/10 bg-black/40 backdrop-blur-2xl flex flex-col overflow-hidden">
         <CardContent className="p-0 overflow-auto">
           <Table>
-            <TableHeader className="bg-black/80 sticky top-0 z-10 border-b border-white/10 backdrop-blur-md">
+            <TableHeader className="bg-black/60 sticky top-0 z-10 border-b border-white/10 backdrop-blur-md">
               <TableRow className="hover:bg-transparent">
                 <TableHead className="text-slate-300">Problema & Contexto</TableHead>
                 <TableHead className="hidden xl:table-cell text-slate-300">
@@ -175,7 +178,10 @@ export default function Historico() {
                 </TableRow>
               ) : (
                 filteredErrors.map((error: ReportRecord) => (
-                  <TableRow key={error.id} className="group hover:bg-muted/20 transition-colors">
+                  <TableRow
+                    key={error.id}
+                    className="group hover:bg-white/5 transition-colors border-white/10"
+                  >
                     <TableCell className="max-w-[250px] sm:max-w-[300px] align-top pt-4">
                       <div className="flex items-start gap-3">
                         {error.images && error.images.length > 0 ? (
