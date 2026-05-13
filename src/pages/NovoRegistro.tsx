@@ -127,8 +127,8 @@ export default function NovoRegistro() {
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in-up pb-10">
       <div className="space-y-1">
-        <h2 className="text-2xl font-bold tracking-tight">Relatar Novo Erro</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-2xl font-bold tracking-tight text-white">Relatar Novo Erro</h2>
+        <p className="text-slate-300">
           Forneça detalhes e evidências sobre a falha do AgentPro para ajudar a equipe a corrigir o
           comportamento.
         </p>
@@ -136,7 +136,7 @@ export default function NovoRegistro() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="shadow-sm border-white/10 bg-black/20 backdrop-blur-md text-white">
+          <Card className="shadow-lg border-slate-700 bg-black/60 backdrop-blur-xl text-white">
             <CardContent className="pt-6 space-y-6">
               <FormField
                 control={form.control}
@@ -148,7 +148,7 @@ export default function NovoRegistro() {
                       <Input
                         placeholder="Ex: AgentPro respondeu em outro idioma"
                         {...field}
-                        className="bg-background"
+                        className="bg-black/50 border-slate-700 placeholder:text-slate-400 text-white focus-visible:ring-cyan-500 focus-visible:border-cyan-500"
                       />
                     </FormControl>
                     <FormMessage />
@@ -165,7 +165,7 @@ export default function NovoRegistro() {
                       <FormLabel>Categoria</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-background">
+                          <SelectTrigger className="bg-black/50 border-slate-700 text-white focus:ring-cyan-500">
                             <SelectValue placeholder="Selecione a categoria" />
                           </SelectTrigger>
                         </FormControl>
@@ -200,33 +200,33 @@ export default function NovoRegistro() {
                           onValueChange={(value) => {
                             if (value) field.onChange(value)
                           }}
-                          className="justify-start bg-muted/50 p-1 rounded-md w-fit"
+                          className="justify-start bg-black/50 border border-slate-700 p-1 rounded-md w-fit"
                         >
                           <ToggleGroupItem
                             value="Baixa"
                             aria-label="Baixa"
-                            className="data-[state=on]:bg-background data-[state=on]:shadow-sm"
+                            className="text-slate-300 hover:text-white data-[state=on]:bg-slate-700 data-[state=on]:text-white data-[state=on]:shadow-sm"
                           >
                             Baixa
                           </ToggleGroupItem>
                           <ToggleGroupItem
                             value="Média"
                             aria-label="Média"
-                            className="data-[state=on]:bg-amber-100 data-[state=on]:text-amber-800 dark:data-[state=on]:bg-amber-900/50"
+                            className="text-slate-300 hover:text-white data-[state=on]:bg-amber-100 data-[state=on]:text-amber-900 font-medium"
                           >
                             Média
                           </ToggleGroupItem>
                           <ToggleGroupItem
                             value="Alta"
                             aria-label="Alta"
-                            className="data-[state=on]:bg-orange-100 data-[state=on]:text-orange-800 dark:data-[state=on]:bg-orange-900/50"
+                            className="text-slate-300 hover:text-white data-[state=on]:bg-orange-100 data-[state=on]:text-orange-900 font-medium"
                           >
                             Alta
                           </ToggleGroupItem>
                           <ToggleGroupItem
                             value="Crítica"
                             aria-label="Crítica"
-                            className="data-[state=on]:bg-red-100 data-[state=on]:text-red-800 dark:data-[state=on]:bg-red-900/50"
+                            className="text-slate-300 hover:text-white data-[state=on]:bg-red-100 data-[state=on]:text-red-900 font-medium"
                           >
                             Crítica
                           </ToggleGroupItem>
@@ -247,7 +247,7 @@ export default function NovoRegistro() {
                     <FormControl>
                       <Textarea
                         placeholder="Descreva exatamente o comportamento incorreto da IA..."
-                        className="min-h-[100px] bg-background resize-y"
+                        className="min-h-[100px] bg-black/50 border-slate-700 placeholder:text-slate-400 text-white focus-visible:ring-cyan-500 focus-visible:border-cyan-500 resize-y"
                         {...field}
                       />
                     </FormControl>
@@ -265,7 +265,7 @@ export default function NovoRegistro() {
                     <FormControl>
                       <Textarea
                         placeholder="Descreva o que era esperado que a IA fizesse nesta situação..."
-                        className="min-h-[100px] bg-background resize-y"
+                        className="min-h-[100px] bg-black/50 border-slate-700 placeholder:text-slate-400 text-white focus-visible:ring-cyan-500 focus-visible:border-cyan-500 resize-y"
                         {...field}
                       />
                     </FormControl>
@@ -283,11 +283,11 @@ export default function NovoRegistro() {
                     <FormControl>
                       <Textarea
                         placeholder="Descreva o que o cliente enviou e qual foi a falha na IA do AgentPro..."
-                        className="min-h-[100px] bg-background resize-y"
+                        className="min-h-[100px] bg-black/50 border-slate-700 placeholder:text-slate-400 text-white focus-visible:ring-cyan-500 focus-visible:border-cyan-500 resize-y"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-slate-400">
                       Copie e cole trechos da conversa se necessário.
                     </FormDescription>
                     <FormMessage />
@@ -304,7 +304,7 @@ export default function NovoRegistro() {
                     <FormControl>
                       <Textarea
                         placeholder="Adicione detalhes técnicos úteis (ex: comportamento esperado, ID da sessão, tipo do exame)..."
-                        className="min-h-[80px] bg-background resize-y"
+                        className="min-h-[80px] bg-black/50 border-slate-700 placeholder:text-slate-400 text-white focus-visible:ring-cyan-500 focus-visible:border-cyan-500 resize-y"
                         {...field}
                       />
                     </FormControl>
@@ -315,23 +315,25 @@ export default function NovoRegistro() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm border-white/10 bg-black/20 backdrop-blur-md text-white mt-6">
+          <Card className="shadow-lg border-slate-700 bg-black/60 backdrop-blur-xl text-white mt-6">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <ImageIcon className="w-5 h-5 text-primary" /> Evidências (Capturas de Tela)
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-slate-300">
                 Adicione screenshots da conversa no WhatsApp mostrando o erro.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div
-                className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/30 transition-colors"
+                className="border-2 border-dashed border-slate-600 bg-black/30 rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-800/50 hover:border-cyan-500/50 transition-colors"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <UploadCloud className="w-10 h-10 text-muted-foreground mb-4" />
-                <p className="font-medium">Clique para selecionar ou arraste imagens aqui</p>
-                <p className="text-xs text-muted-foreground mt-1">PNG, JPG ou WEBP (Max. 5MB)</p>
+                <UploadCloud className="w-10 h-10 text-cyan-400 mb-4" />
+                <p className="font-medium text-slate-200">
+                  Clique para selecionar ou arraste imagens aqui
+                </p>
+                <p className="text-xs text-slate-400 mt-1">PNG, JPG ou WEBP (Max. 5MB)</p>
                 <input
                   type="file"
                   multiple
