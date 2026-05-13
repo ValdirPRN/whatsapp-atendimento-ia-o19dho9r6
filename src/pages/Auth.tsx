@@ -139,8 +139,9 @@ export default function AuthPage() {
 
       {/* Layer 1: Content */}
       <div className="min-h-screen flex items-center justify-center relative z-10 p-4">
-        <Card className="w-full max-w-md shadow-2xl border-white/10 bg-black/60 backdrop-blur-2xl animate-fade-in-up text-white">
-          <CardHeader className="space-y-2 text-center pb-6">
+        <Card className="w-full max-w-md shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/20 bg-black/40 backdrop-blur-xl animate-fade-in-up text-white relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none rounded-xl" />
+          <CardHeader className="space-y-2 text-center pb-6 relative z-10">
             <div className="mx-auto bg-primary w-14 h-14 flex items-center justify-center rounded-2xl mb-4 shadow-lg shadow-primary/30">
               <MessageSquareWarning className="w-7 h-7 text-black" />
             </div>
@@ -152,18 +153,18 @@ export default function AuthPage() {
             </CardDescription>
           </CardHeader>
 
-          <CardContent>
+          <CardContent className="relative z-10">
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6 bg-white/5 border border-white/10">
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-black/30 border border-white/10 p-1 backdrop-blur-md rounded-lg">
                 <TabsTrigger
                   value="login"
-                  className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60"
+                  className="data-[state=active]:bg-white/15 data-[state=active]:text-white data-[state=active]:shadow-md text-white/60 rounded-md transition-all"
                 >
                   Entrar
                 </TabsTrigger>
                 <TabsTrigger
                   value="register"
-                  className="data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60"
+                  className="data-[state=active]:bg-white/15 data-[state=active]:text-white data-[state=active]:shadow-md text-white/60 rounded-md transition-all"
                 >
                   Cadastrar
                 </TabsTrigger>
@@ -183,7 +184,7 @@ export default function AuthPage() {
                       onChange={(e) => setIdentity(e.target.value)}
                       required
                       autoComplete="username"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:bg-white/10 focus:border-cyan-500 transition-colors"
+                      className="bg-black/20 border-white/10 text-white placeholder:text-white/40 focus:bg-black/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all backdrop-blur-sm shadow-inner"
                     />
                   </div>
                   <div className="space-y-2">
@@ -198,12 +199,12 @@ export default function AuthPage() {
                       onChange={(e) => setLoginPassword(e.target.value)}
                       required
                       autoComplete="current-password"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:bg-white/10 focus:border-cyan-500 transition-colors"
+                      className="bg-black/20 border-white/10 text-white placeholder:text-white/40 focus:bg-black/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all backdrop-blur-sm shadow-inner"
                     />
                   </div>
                   <Button
                     type="submit"
-                    className="w-full shadow-md py-6 text-base font-semibold mt-6 bg-cyan-600 hover:bg-cyan-500 text-white border-0"
+                    className="w-full shadow-lg shadow-cyan-900/50 py-6 text-base font-semibold mt-6 bg-cyan-600 hover:bg-cyan-500 text-white border border-cyan-400/30 transition-all hover:scale-[1.02]"
                     disabled={isSubmitting || isSuccess}
                   >
                     {isSubmitting || isSuccess ? (
@@ -231,7 +232,7 @@ export default function AuthPage() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
-                      className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:bg-white/10 focus:border-cyan-500 transition-colors ${fieldErrors.name ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                      className={`bg-black/20 border-white/10 text-white placeholder:text-white/40 focus:bg-black/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all backdrop-blur-sm shadow-inner ${fieldErrors.name ? 'border-red-500 focus-visible:ring-red-500 focus:ring-1 focus:ring-red-500' : ''}`}
                     />
                     {fieldErrors.name && (
                       <p className="text-xs text-red-400 font-medium">{fieldErrors.name}</p>
@@ -249,7 +250,7 @@ export default function AuthPage() {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       required
-                      className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:bg-white/10 focus:border-cyan-500 transition-colors ${fieldErrors.username ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                      className={`bg-black/20 border-white/10 text-white placeholder:text-white/40 focus:bg-black/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all backdrop-blur-sm shadow-inner ${fieldErrors.username ? 'border-red-500 focus-visible:ring-red-500 focus:ring-1 focus:ring-red-500' : ''}`}
                     />
                     {fieldErrors.username && (
                       <p className="text-xs text-red-400 font-medium">{fieldErrors.username}</p>
@@ -267,7 +268,7 @@ export default function AuthPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:bg-white/10 focus:border-cyan-500 transition-colors ${fieldErrors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                      className={`bg-black/20 border-white/10 text-white placeholder:text-white/40 focus:bg-black/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all backdrop-blur-sm shadow-inner ${fieldErrors.email ? 'border-red-500 focus-visible:ring-red-500 focus:ring-1 focus:ring-red-500' : ''}`}
                     />
                     {fieldErrors.email && (
                       <p className="text-xs text-red-400 font-medium">{fieldErrors.email}</p>
@@ -286,7 +287,7 @@ export default function AuthPage() {
                         value={regPassword}
                         onChange={(e) => setRegPassword(e.target.value)}
                         required
-                        className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:bg-white/10 focus:border-cyan-500 transition-colors ${fieldErrors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                        className={`bg-black/20 border-white/10 text-white placeholder:text-white/40 focus:bg-black/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all backdrop-blur-sm shadow-inner ${fieldErrors.password ? 'border-red-500 focus-visible:ring-red-500 focus:ring-1 focus:ring-red-500' : ''}`}
                       />
                       {fieldErrors.password && (
                         <p className="text-xs text-red-400 font-medium">{fieldErrors.password}</p>
@@ -304,7 +305,7 @@ export default function AuthPage() {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
-                        className={`bg-white/5 border-white/10 text-white placeholder:text-white/40 focus:bg-white/10 focus:border-cyan-500 transition-colors ${fieldErrors.passwordConfirm ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                        className={`bg-black/20 border-white/10 text-white placeholder:text-white/40 focus:bg-black/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all backdrop-blur-sm shadow-inner ${fieldErrors.passwordConfirm ? 'border-red-500 focus-visible:ring-red-500 focus:ring-1 focus:ring-red-500' : ''}`}
                       />
                     </div>
                   </div>
@@ -316,7 +317,7 @@ export default function AuthPage() {
 
                   <Button
                     type="submit"
-                    className="w-full shadow-md py-6 text-base font-semibold mt-6 bg-cyan-600 hover:bg-cyan-500 text-white border-0"
+                    className="w-full shadow-lg shadow-cyan-900/50 py-6 text-base font-semibold mt-6 bg-cyan-600 hover:bg-cyan-500 text-white border border-cyan-400/30 transition-all hover:scale-[1.02]"
                     disabled={isSubmitting || isSuccess}
                   >
                     {isSubmitting || isSuccess ? (
