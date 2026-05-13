@@ -36,7 +36,11 @@ export function Layout() {
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between p-4 bg-black/40 backdrop-blur-xl border-b border-white/10 z-10 sticky top-0 text-white">
           <div className="flex items-center gap-2">
-            <img src={logoImg} alt="AgentPro Logo" className="w-8 h-8 object-contain" />
+            <img
+              src={logoImg}
+              alt="AgentPro Logo"
+              className="w-8 h-8 object-contain logo-glow cursor-pointer"
+            />
             <span className="font-bold text-lg">AgentPro</span>
           </div>
           <Sheet>
@@ -50,7 +54,11 @@ export function Layout() {
               className="w-64 flex flex-col bg-black/90 backdrop-blur-2xl border-white/10 text-white"
             >
               <div className="flex items-center gap-2 mb-8 mt-4">
-                <img src={logoImg} alt="AgentPro Logo" className="w-10 h-10 object-contain" />
+                <img
+                  src={logoImg}
+                  alt="AgentPro Logo"
+                  className="w-10 h-10 object-contain logo-glow cursor-pointer"
+                />
                 <span className="font-bold text-lg">AgentPro</span>
               </div>
               <nav className="flex-1 flex flex-col gap-2">
@@ -108,7 +116,11 @@ export function Layout() {
         {/* Desktop Sidebar */}
         <aside className="hidden md:flex w-64 flex-col bg-black/40 backdrop-blur-xl border-r border-white/10 min-h-screen sticky top-0 text-white">
           <div className="p-6 flex items-center gap-3">
-            <img src={logoImg} alt="AgentPro Logo" className="w-12 h-12 object-contain" />
+            <img
+              src={logoImg}
+              alt="AgentPro Logo"
+              className="w-12 h-12 object-contain logo-glow cursor-pointer"
+            />
             <span className="font-bold text-xl tracking-tight text-white">
               Agent<span className="font-light text-cyan-400">Pro</span>
             </span>

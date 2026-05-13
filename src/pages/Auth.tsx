@@ -153,7 +153,7 @@ export default function AuthPage() {
           <img
             src={logoImg}
             alt="AgentPro Logo"
-            className="w-32 h-32 object-contain drop-shadow-[0_0_15px_rgba(0,255,255,0.2)]"
+            className="w-32 h-32 object-contain logo-glow cursor-pointer"
           />
           <h1 className="text-4xl font-bold tracking-tight text-white mt-4">
             Agent<span className="font-light text-cyan-400">Pro</span>
