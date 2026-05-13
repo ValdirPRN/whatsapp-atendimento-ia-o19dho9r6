@@ -26,7 +26,9 @@ export function Layout() {
 
   return (
     <>
-      <MeshGradient />
+      <div className="fixed inset-0 z-[-1] pointer-events-none bg-background">
+        <MeshGradient />
+      </div>
       <div className="min-h-screen flex flex-col md:flex-row w-full relative z-0">
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between p-4 bg-black/40 backdrop-blur-xl border-b border-white/10 z-10 sticky top-0 text-white">
@@ -55,6 +57,23 @@ export function Layout() {
               <nav className="flex-1 flex flex-col gap-2">
                 {navItems.map((item) => {
                   const isActive = location.pathname === item.path
+                  if (item.path === '/novo-registro') {
+                    return (
+                      <Link key={item.path} to={item.path} className="my-2">
+                        <Button
+                          className={cn(
+                            'w-full justify-start gap-3 transition-all ease-out shadow-lg',
+                            isActive
+                              ? 'bg-cyan-600 hover:bg-cyan-500 text-white'
+                              : 'bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300 border border-cyan-500/20',
+                          )}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          {item.name}
+                        </Button>
+                      </Link>
+                    )
+                  }
                   return (
                     <Link key={item.path} to={item.path}>
                       <Button
@@ -100,6 +119,23 @@ export function Layout() {
           <nav className="flex-1 px-4 flex flex-col gap-2 mt-4">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path
+              if (item.path === '/novo-registro') {
+                return (
+                  <Link key={item.path} to={item.path} className="my-2">
+                    <Button
+                      className={cn(
+                        'w-full justify-start gap-3 transition-all ease-out shadow-lg hover:shadow-cyan-500/20',
+                        isActive
+                          ? 'bg-cyan-600 hover:bg-cyan-500 text-white'
+                          : 'bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300 border border-cyan-500/20',
+                      )}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      {item.name}
+                    </Button>
+                  </Link>
+                )
+              }
               return (
                 <Link key={item.path} to={item.path}>
                   <Button
