@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { MessageSquareWarning, Loader2 } from 'lucide-react'
+import { MessageSquareWarning, Loader2, AlertCircle } from 'lucide-react'
 import { useNavigate, Navigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { extractFieldErrors, getErrorMessage } from '@/lib/pocketbase/errors'
@@ -22,6 +22,7 @@ export default function AuthPage() {
 
   const [identity, setIdentity] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
+  const [loginError, setLoginError] = useState(false)
 
   const [name, setName] = useState('')
   const [username, setUsername] = useState('')
@@ -36,7 +37,18 @@ export default function AuthPage() {
   const handleTabChange = (val: string) => {
     setActiveTab(val)
     setFieldErrors({})
+    setLoginError(false)
     navigate(val === 'register' ? '/register' : '/login', { replace: true })
+  }
+
+  const handleIdentityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIdentity(e.target.value)
+    if (loginError) setLoginError(false)
+  }
+
+  const handleLoginPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLoginPassword(e.target.value)
+    if (loginError) setLoginError(false)
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -44,18 +56,15 @@ export default function AuthPage() {
     if (isSubmitting || authLoading || isSuccess) return
     setIsSubmitting(true)
     setFieldErrors({})
+    setLoginError(false)
 
     const trimmedIdentity = identity.trim()
     const trimmedPassword = loginPassword.trim()
 
     const { error } = await signIn(trimmedIdentity, trimmedPassword)
     if (error) {
-      const apiMsg = getErrorMessage(error)
-      const errorMsg =
-        apiMsg && apiMsg !== 'An unexpected error occurred.'
-          ? apiMsg
-          : 'Falha ao autenticar. Verifique suas credenciais.'
-      toast.error(errorMsg)
+      setLoginError(true)
+      toast.error('Usuário ou senha incorretos')
       setIsSubmitting(false)
     } else {
       toast.success('Login realizado com sucesso!')
@@ -172,6 +181,12 @@ export default function AuthPage() {
 
               <TabsContent value="login" className="mt-0">
                 <form onSubmit={handleLogin} className="space-y-4" noValidate>
+                  {loginError && (
+                    <div className="p-3 rounded-md bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2 animate-fade-in">
+                      <AlertCircle className="h-4 w-4" />
+                      <span>Usuário ou senha incorretos</span>
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label htmlFor="identity" className="text-white/90">
                       E-mail ou Usuário
@@ -181,10 +196,10 @@ export default function AuthPage() {
                       type="text"
                       placeholder="E-mail ou Usuário"
                       value={identity}
-                      onChange={(e) => setIdentity(e.target.value)}
+                      onChange={handleIdentityChange}
                       required
                       autoComplete="username"
-                      className="bg-black/20 border-white/10 text-white placeholder:text-white/40 focus:bg-black/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all backdrop-blur-sm shadow-inner"
+                      className={`bg-black/20 border-white/10 text-white placeholder:text-white/40 focus:bg-black/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all backdrop-blur-sm shadow-inner ${loginError ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500' : ''}`}
                     />
                   </div>
                   <div className="space-y-2">
@@ -196,10 +211,10 @@ export default function AuthPage() {
                       type="password"
                       placeholder="••••••••"
                       value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
+                      onChange={handleLoginPasswordChange}
                       required
                       autoComplete="current-password"
-                      className="bg-black/20 border-white/10 text-white placeholder:text-white/40 focus:bg-black/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all backdrop-blur-sm shadow-inner"
+                      className={`bg-black/20 border-white/10 text-white placeholder:text-white/40 focus:bg-black/40 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all backdrop-blur-sm shadow-inner ${loginError ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500' : ''}`}
                     />
                   </div>
                   <Button
