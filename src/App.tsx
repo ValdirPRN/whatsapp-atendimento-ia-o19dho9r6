@@ -39,6 +39,7 @@ export default function App() {
             }
           >
             <Route path="/" element={<IndexPage />} />
+            <Route path="/dashboard" element={<Navigate to="/" replace />} />
             <Route path="/historico" element={<HistoricoPage />} />
             <Route path="/novo-registro" element={<NovoRegistro />} />
             <Route path="/equipe" element={<EquipePage />} />

@@ -31,12 +31,12 @@ export function Login() {
 
     const { error } = await signIn(loginIdentity, trimmedPassword)
     if (error) {
-      toast.error('Falha na autenticação. Verifique seu usuário e senha.')
+      toast.error('Login failed: Invalid username or password.')
       setIsSubmitting(false)
     } else {
       toast.success('Login realizado com sucesso!')
       setIsSuccess(true)
-      navigate('/', { replace: true })
+      navigate('/dashboard', { replace: true })
     }
   }
 
