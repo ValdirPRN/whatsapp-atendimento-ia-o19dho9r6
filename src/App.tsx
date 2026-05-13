@@ -4,6 +4,7 @@ import { Login } from '@/pages/Login'
 import IndexPage from '@/pages/Index'
 import HistoricoPage from '@/pages/Historico'
 import NovoRegistro from '@/pages/NovoRegistro'
+import EquipePage from '@/pages/Equipe'
 import { Layout } from '@/components/Layout'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="/" element={<IndexPage />} />
             <Route path="/historico" element={<HistoricoPage />} />
             <Route path="/novo-registro" element={<NovoRegistro />} />
+            <Route path="/equipe" element={<EquipePage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

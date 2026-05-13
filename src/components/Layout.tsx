@@ -8,6 +8,7 @@ import {
   LogOut,
   Menu,
   PlusCircle,
+  Users,
 } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
@@ -22,6 +23,7 @@ export function Layout() {
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
     { name: 'Novo Registro', path: '/novo-registro', icon: PlusCircle },
     { name: 'Histórico', path: '/historico', icon: History },
+    { name: 'Equipe', path: '/equipe', icon: Users },
   ]
 
   return (
