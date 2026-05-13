@@ -2,9 +2,16 @@ import { useState } from 'react'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from '@/components/ui/card'
 import { MessageSquareWarning, Loader2 } from 'lucide-react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate, Navigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { getErrorMessage } from '@/lib/pocketbase/errors'
 
@@ -31,7 +38,7 @@ export function Login() {
       const errorMsg =
         apiMsg && apiMsg !== 'An unexpected error occurred.'
           ? apiMsg
-          : 'Failed to authenticate. Please check your credentials.'
+          : 'Falha ao autenticar. Verifique suas credenciais ou crie uma conta.'
 
       toast.error(errorMsg)
       setIsSubmitting(false)
@@ -44,7 +51,7 @@ export function Login() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
@@ -55,28 +62,30 @@ export function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
-      <Card className="w-full max-w-md shadow-lg border-border/50 animate-fade-in-up">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 p-4">
+      <Card className="w-full max-w-md shadow-xl border-white/50 bg-white/80 backdrop-blur-sm animate-fade-in-up">
         <CardHeader className="space-y-2 text-center pb-6">
-          <div className="mx-auto bg-primary w-12 h-12 flex items-center justify-center rounded-xl mb-4 shadow-sm">
-            <MessageSquareWarning className="w-6 h-6 text-primary-foreground" />
+          <div className="mx-auto bg-primary w-14 h-14 flex items-center justify-center rounded-2xl mb-4 shadow-md">
+            <MessageSquareWarning className="w-7 h-7 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">
+          <CardTitle className="text-3xl font-bold tracking-tight text-slate-900">
             Agent<span className="font-light opacity-70">Pro</span>
           </CardTitle>
-          <CardDescription>Faça login para acessar o painel de controle</CardDescription>
+          <CardDescription className="text-slate-500">
+            Faça login para acessar o painel de controle
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4" noValidate>
             <div className="space-y-2">
               <Input
                 type="text"
-                placeholder="Usuário ou Email (ex: Paulo novack)"
+                placeholder="E-mail ou Usuário"
                 value={identity}
                 onChange={(e) => setIdentity(e.target.value)}
                 required
                 autoComplete="username"
-                className="bg-background"
+                className="bg-white"
               />
             </div>
             <div className="space-y-2">
@@ -86,31 +95,41 @@ export function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-background"
+                className="bg-white"
               />
             </div>
-            <Button type="submit" className="w-full shadow-sm" disabled={isSubmitting || isSuccess}>
+            <Button
+              type="submit"
+              className="w-full shadow-sm py-6 text-base"
+              disabled={isSubmitting || isSuccess}
+            >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Entrando...
                 </>
               ) : isSuccess ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Redirecionando para o painel...
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Redirecionando...
                 </>
               ) : (
                 'Entrar'
               )}
             </Button>
-            {isSuccess && (
-              <p className="text-sm text-center text-muted-foreground animate-fade-in">
-                Login concluído. Aguardando redirecionamento...
-              </p>
-            )}
           </form>
         </CardContent>
+        <CardFooter className="flex justify-center border-t border-slate-100 pt-6">
+          <p className="text-sm text-slate-500">
+            Não tem uma conta?{' '}
+            <Link
+              to="/register"
+              className="text-primary font-medium hover:underline hover:text-primary/80 transition-colors"
+            >
+              Cadastre-se
+            </Link>
+          </p>
+        </CardFooter>
       </Card>
     </div>
   )
