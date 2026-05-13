@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T13:06:00.680Z",
+  "generatedAt": "2026-05-13T13:10:00.219Z",
   "collections": [
     {
       "name": "users",
@@ -9,7 +9,7 @@
         "view": "@request.auth.id != ''",
         "create": "",
         "update": "id = @request.auth.id",
-        "delete": "id = @request.auth.id"
+        "delete": "@request.auth.role = 'admin' || id = @request.auth.id"
       },
       "fields": [
         {
@@ -37,6 +37,12 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "role",
+          "type": "text",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": [

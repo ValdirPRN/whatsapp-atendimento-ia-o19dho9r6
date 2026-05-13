@@ -1,20 +1,42 @@
 import { useState, useEffect } from 'react'
-import { getUsers, createUser, User } from '@/services/users'
+import { getUsers, createUser, deleteUser, User } from '@/services/users'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useAuth } from '@/hooks/use-auth'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { toast } from 'sonner'
-import { Users, UserPlus, Mail, Shield } from 'lucide-react'
+import { Users, UserPlus, Shield, Trash2, Calendar, Fingerprint } from 'lucide-react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { format } from 'date-fns'
 
 export default function EquipePage() {
+  const { user: currentUser } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
 
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' })
+  const [formData, setFormData] = useState({ name: '', username: '', password: '' })
   const [submitting, setSubmitting] = useState(false)
 
   const loadUsers = async () => {
@@ -41,16 +63,29 @@ export default function EquipePage() {
     setSubmitting(true)
     try {
       await createUser({
-        ...formData,
+        name: formData.name,
+        username: formData.username,
+        email: `${formData.username}@agentpro.local`,
+        password: formData.password,
         passwordConfirm: formData.password,
+        role: 'member',
       })
       toast.success('Membro adicionado com sucesso!')
       setIsOpen(false)
-      setFormData({ name: '', email: '', password: '' })
+      setFormData({ name: '', username: '', password: '' })
     } catch (e: any) {
       toast.error(e.message || 'Erro ao criar usuário')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteUser(id)
+      toast.success('Usuário excluído com sucesso')
+    } catch (e: any) {
+      toast.error(e.message || 'Erro ao excluir usuário')
     }
   }
 
@@ -59,11 +94,11 @@ export default function EquipePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative">
         <div className="space-y-2 z-10">
           <div className="flex items-center gap-4">
-            <div className="bg-purple-500/10 p-3 rounded-2xl border border-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.15)] backdrop-blur-md">
-              <Users className="w-8 h-8 text-purple-400" />
+            <div className="bg-cyan-500/10 p-3 rounded-2xl border border-cyan-500/20 shadow-[0_0_20px_rgba(34,211,238,0.15)] backdrop-blur-md">
+              <Users className="w-8 h-8 text-cyan-400" />
             </div>
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-100 to-purple-500 drop-shadow-md">
-              Gestão de <span className="font-light text-purple-400">Equipe</span>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-100 to-cyan-500 drop-shadow-md">
+              Gestão de <span className="font-light text-cyan-400">Equipe</span>
             </h1>
           </div>
           <p className="text-slate-400 text-base sm:text-lg max-w-xl">
@@ -73,14 +108,14 @@ export default function EquipePage() {
 
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
-            <Button className="gap-2 shadow-lg shadow-purple-500/20 bg-purple-600 hover:bg-purple-500 text-white transition-all ease-out h-11 px-6">
+            <Button className="gap-2 shadow-lg shadow-cyan-500/20 bg-cyan-600 hover:bg-cyan-500 text-white transition-all ease-out h-11 px-6">
               <UserPlus className="w-4 h-4" /> Novo Membro
             </Button>
           </SheetTrigger>
           <SheetContent className="bg-black/90 backdrop-blur-2xl border-white/10 text-white sm:max-w-md w-[400px]">
             <div className="flex flex-col space-y-2 text-left mb-6 mt-4">
               <h2 className="text-white text-xl font-semibold flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-purple-400" /> Adicionar Membro
+                <UserPlus className="w-5 h-5 text-cyan-400" /> Adicionar Membro
               </h2>
               <p className="text-sm text-slate-400">
                 Preencha os dados abaixo para criar um novo acesso ao sistema.
@@ -96,22 +131,26 @@ export default function EquipePage() {
                   value={formData.name}
                   onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
                   required
-                  className="bg-black/50 border-white/10 text-white focus-visible:ring-purple-500"
+                  className="bg-black/50 border-white/10 text-white focus-visible:ring-cyan-500"
                   placeholder="Ex: João Silva"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-300">
-                  E-mail
+                <Label htmlFor="username" className="text-slate-300">
+                  Nome de Usuário (Username)
                 </Label>
                 <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
+                  id="username"
+                  value={formData.username}
+                  onChange={(e) =>
+                    setFormData((p) => ({
+                      ...p,
+                      username: e.target.value.toLowerCase().replace(/[^a-z0-9_.-]/g, ''),
+                    }))
+                  }
                   required
-                  className="bg-black/50 border-white/10 text-white focus-visible:ring-purple-500"
-                  placeholder="joao@empresa.com"
+                  className="bg-black/50 border-white/10 text-white focus-visible:ring-cyan-500"
+                  placeholder="Ex: joao.silva"
                 />
               </div>
               <div className="space-y-2">
@@ -125,13 +164,13 @@ export default function EquipePage() {
                   onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
                   required
                   minLength={8}
-                  className="bg-black/50 border-white/10 text-white focus-visible:ring-purple-500"
+                  className="bg-black/50 border-white/10 text-white focus-visible:ring-cyan-500"
                   placeholder="Mínimo 8 caracteres"
                 />
               </div>
               <Button
                 type="submit"
-                className="w-full bg-purple-600 hover:bg-purple-500 text-white mt-4"
+                className="w-full bg-cyan-600 hover:bg-cyan-500 text-white mt-4"
                 disabled={submitting}
               >
                 {submitting ? 'Criando...' : 'Criar Conta'}
@@ -156,29 +195,90 @@ export default function EquipePage() {
           ) : users.length === 0 ? (
             <div className="text-center py-12 text-slate-400">Nenhum membro encontrado.</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-              {users.map((u) => (
-                <div
-                  key={u.id}
-                  className="bg-white/5 border border-white/10 rounded-xl p-5 flex items-start gap-4 hover:bg-white/10 transition-colors"
-                >
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0">
-                    {u.name ? u.name.charAt(0).toUpperCase() : u.email.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="overflow-hidden w-full">
-                    <h3 className="text-white font-medium truncate">{u.name || 'Sem nome'}</h3>
-                    <div className="flex items-center gap-1.5 text-slate-400 text-sm mt-1">
-                      <Mail className="w-3.5 h-3.5 shrink-0" />
-                      <span className="truncate">{u.email}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-slate-500 text-xs mt-2">
-                      <Shield className="w-3.5 h-3.5 shrink-0" />
-                      <span>Acesso Padrão</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Table>
+              <TableHeader className="bg-white/5">
+                <TableRow className="border-white/10 hover:bg-transparent">
+                  <TableHead className="text-slate-400 font-medium">Usuário</TableHead>
+                  <TableHead className="text-slate-400 font-medium">Username</TableHead>
+                  <TableHead className="text-slate-400 font-medium">Função</TableHead>
+                  <TableHead className="text-slate-400 font-medium">Criado em</TableHead>
+                  <TableHead className="text-right text-slate-400 font-medium">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map((u) => (
+                  <TableRow key={u.id} className="border-white/5 hover:bg-white/5">
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-md shrink-0">
+                          {u.name
+                            ? u.name.charAt(0).toUpperCase()
+                            : u.username?.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="text-white">{u.name || 'Sem nome'}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-slate-300 text-sm">
+                        <Fingerprint className="w-3.5 h-3.5 text-slate-500" />
+                        <span>{u.username}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        <Shield className="w-3.5 h-3.5 text-slate-500" />
+                        <span className="text-slate-300 text-sm capitalize">
+                          {u.role || 'Member'}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-slate-400 text-sm">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>{format(new Date(u.created), 'dd/MM/yyyy')}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {currentUser?.id !== u.id && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="bg-slate-950 border-white/10 text-white">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Tem certeza que deseja excluir este usuário?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className="text-slate-400">
+                                Esta ação não pode ser desfeita. O usuário perderá o acesso ao
+                                sistema permanentemente.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white">
+                                Cancelar
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(u.id)}
+                                className="bg-red-600 text-white hover:bg-red-700"
+                              >
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
