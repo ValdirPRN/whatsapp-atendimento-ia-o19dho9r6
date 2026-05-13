@@ -37,11 +37,13 @@ import {
 import { useRealtime } from '@/hooks/use-realtime'
 import pb from '@/lib/pocketbase/client'
 import { ReportRecord } from '@/lib/types'
+import { ReportDetailsModal } from '@/components/ReportDetailsModal'
 
 export default function Historico() {
   const [reports, setReports] = useState<ReportRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState<string>('Todos')
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
 
   const fetchReports = async () => {
     try {
@@ -196,7 +198,8 @@ export default function Historico() {
                 filteredErrors.map((error: ReportRecord) => (
                   <TableRow
                     key={error.id}
-                    className="group hover:bg-white/5 transition-colors border-white/10"
+                    className="group hover:bg-white/10 transition-colors border-white/10 cursor-pointer"
+                    onClick={() => setSelectedReportId(error.id)}
                   >
                     <TableCell className="max-w-[250px] sm:max-w-[300px] align-top pt-4">
                       <div className="flex items-start gap-3">
@@ -217,12 +220,9 @@ export default function Historico() {
                         )}
                         <div className="flex flex-col space-y-1 overflow-hidden">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <Link
-                              to={`/erro/${error.id}`}
-                              className="font-medium text-slate-100 group-hover:text-white transition-colors truncate block max-w-full"
-                            >
+                            <span className="font-medium text-slate-100 group-hover:text-white transition-colors truncate block max-w-full">
                               {error.title || 'Sem título'}
-                            </Link>
+                            </span>
                             {isNew(error.created) && (
                               <Badge className="h-4 text-[9px] px-1 bg-blue-500 hover:bg-blue-600 text-white border-none shrink-0">
                                 NOVO
@@ -260,22 +260,26 @@ export default function Historico() {
                     <TableCell className="hidden md:table-cell text-slate-400 text-sm align-top pt-4 whitespace-nowrap">
                       {formatDate(error.created)}
                     </TableCell>
-                    <TableCell className="align-top pt-4">
+                    <TableCell className="align-top pt-4" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
-                            className="h-8 w-8 p-0 text-slate-300 hover:text-white hover:bg-white/10"
+                            className="h-8 w-8 p-0 text-slate-300 hover:text-white hover:bg-white/20"
                           >
                             <span className="sr-only">Abrir menu</span>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link to={`/erro/${error.id}`} className="flex items-center">
-                              <FileText className="mr-2 h-4 w-4" /> Ver Detalhes
-                            </Link>
+                        <DropdownMenuContent
+                          align="end"
+                          className="bg-black/90 border-white/10 text-white"
+                        >
+                          <DropdownMenuItem
+                            onClick={() => setSelectedReportId(error.id)}
+                            className="flex items-center cursor-pointer focus:bg-white/10 focus:text-white"
+                          >
+                            <FileText className="mr-2 h-4 w-4" /> Ver Detalhes
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -287,6 +291,12 @@ export default function Historico() {
           </Table>
         </CardContent>
       </Card>
+
+      <ReportDetailsModal
+        reportId={selectedReportId}
+        open={!!selectedReportId}
+        onOpenChange={(open) => !open && setSelectedReportId(null)}
+      />
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import { getReports, updateReport, Report } from '@/services/reports'
+import { ReportDetailsModal } from '@/components/ReportDetailsModal'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -35,6 +36,7 @@ export default function IndexPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('Todos')
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
 
   const loadReports = async () => {
     try {
@@ -218,7 +220,8 @@ export default function IndexPage() {
                   {filteredReports.map((report) => (
                     <tr
                       key={report.id}
-                      className="bg-transparent hover:bg-white/[0.02] transition-colors"
+                      className="bg-transparent hover:bg-white/[0.05] transition-colors cursor-pointer"
+                      onClick={() => setSelectedReportId(report.id)}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div
@@ -276,7 +279,7 @@ export default function IndexPage() {
                           <span className="text-slate-300 font-medium">{report.status}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-end min-w-[140px]">
                           <Select
                             value={report.status}
@@ -301,6 +304,12 @@ export default function IndexPage() {
           )}
         </CardContent>
       </Card>
+
+      <ReportDetailsModal
+        reportId={selectedReportId}
+        open={!!selectedReportId}
+        onOpenChange={(open) => !open && setSelectedReportId(null)}
+      />
     </div>
   )
 }
