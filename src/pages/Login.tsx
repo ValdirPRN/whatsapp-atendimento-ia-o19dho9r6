@@ -11,26 +11,31 @@ export function Login() {
   const [identity, setIdentity] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
   const { user, signIn, loading: authLoading } = useAuth()
   const navigate = useNavigate()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (isSubmitting || authLoading) return
+    if (isSubmitting || authLoading || isSuccess) return
 
     setIsSubmitting(true)
 
-    let loginIdentity = identity.trim()
+    const trimmedIdentity = identity.trim()
+    const trimmedPassword = password.trim()
+
+    let loginIdentity = trimmedIdentity
     if (!loginIdentity.includes('@')) {
       loginIdentity = loginIdentity.replace(/\s+/g, '_').toLowerCase()
     }
 
-    const { error } = await signIn(loginIdentity, password)
+    const { error } = await signIn(loginIdentity, trimmedPassword)
     if (error) {
       toast.error('Falha na autenticação. Verifique seu usuário e senha.')
       setIsSubmitting(false)
     } else {
       toast.success('Login realizado com sucesso!')
+      setIsSuccess(true)
       navigate('/', { replace: true })
     }
   }
@@ -82,16 +87,26 @@ export function Login() {
                 className="bg-background"
               />
             </div>
-            <Button type="submit" className="w-full shadow-sm" disabled={isSubmitting}>
+            <Button type="submit" className="w-full shadow-sm" disabled={isSubmitting || isSuccess}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Entrando...
                 </>
+              ) : isSuccess ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Redirecionando para o painel...
+                </>
               ) : (
                 'Entrar'
               )}
             </Button>
+            {isSuccess && (
+              <p className="text-sm text-center text-muted-foreground animate-fade-in">
+                Login concluído. Aguardando redirecionamento...
+              </p>
+            )}
           </form>
         </CardContent>
       </Card>
