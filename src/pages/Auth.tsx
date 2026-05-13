@@ -10,6 +10,7 @@ import { useNavigate, Navigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { extractFieldErrors, getErrorMessage } from '@/lib/pocketbase/errors'
 import { MeshGradient } from '@/components/MeshGradient'
+import logoImg from '@/assets/chatgptimage28deabr.de2026141414-removebg-preview-6fa6a.png'
 
 export default function AuthPage() {
   const location = useLocation()
@@ -147,17 +148,22 @@ export default function AuthPage() {
       </div>
 
       {/* Layer 1: Content */}
-      <div className="min-h-screen flex items-center justify-center relative z-10 p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center relative z-10 p-4">
+        <div className="mb-8 flex flex-col items-center animate-fade-in-down">
+          <img
+            src={logoImg}
+            alt="AgentPro Logo"
+            className="w-32 h-32 object-contain drop-shadow-[0_0_15px_rgba(0,255,255,0.2)]"
+          />
+          <h1 className="text-4xl font-bold tracking-tight text-white mt-4">
+            Agent<span className="font-light text-cyan-400">Pro</span>
+          </h1>
+        </div>
+
         <Card className="w-full max-w-md shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/20 bg-black/40 backdrop-blur-xl animate-fade-in-up text-white relative">
           <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none rounded-xl" />
           <CardHeader className="space-y-2 text-center pb-6 relative z-10">
-            <div className="mx-auto bg-primary w-14 h-14 flex items-center justify-center rounded-2xl mb-4 shadow-lg shadow-primary/30">
-              <MessageSquareWarning className="w-7 h-7 text-black" />
-            </div>
-            <CardTitle className="text-3xl font-bold tracking-tight text-white">
-              Agent<span className="font-light text-cyan-400">Pro</span>
-            </CardTitle>
-            <CardDescription className="text-white/60 font-medium">
+            <CardDescription className="text-white/60 font-medium text-lg">
               Sistema Integrado de Atendimento IA
             </CardDescription>
           </CardHeader>
