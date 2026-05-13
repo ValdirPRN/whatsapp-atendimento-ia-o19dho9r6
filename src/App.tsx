@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
-import { Login } from '@/pages/Login'
-import { Register } from '@/pages/Register'
+import AuthPage from '@/pages/Auth'
 import IndexPage from '@/pages/Index'
 import HistoricoPage from '@/pages/Historico'
 import NovoRegistro from '@/pages/NovoRegistro'
@@ -31,8 +30,8 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<AuthPage />} />
+          <Route path="/register" element={<AuthPage />} />
           <Route
             element={
               <ProtectedRoute>
