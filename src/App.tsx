@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from '@/hooks/use-auth'
 import { Login } from '@/pages/Login'
 import IndexPage from '@/pages/Index'
 import HistoricoPage from '@/pages/Historico'
+import NovoRegistro from '@/pages/NovoRegistro'
 import { Layout } from '@/components/Layout'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -38,6 +39,7 @@ export default function App() {
           >
             <Route path="/" element={<IndexPage />} />
             <Route path="/historico" element={<HistoricoPage />} />
+            <Route path="/novo-registro" element={<NovoRegistro />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

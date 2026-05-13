@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, Filter, MoreHorizontal, FileText, Image as ImageIcon } from 'lucide-react'
+import {
+  Calendar,
+  Filter,
+  MoreHorizontal,
+  FileText,
+  Image as ImageIcon,
+  PlusCircle,
+} from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -121,7 +128,16 @@ export default function Historico() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <Button
+            asChild
+            className="flex-1 sm:flex-none bg-primary text-black hover:bg-primary/90 font-semibold border-none"
+          >
+            <Link to="/novo-registro">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Novo Registro
+            </Link>
+          </Button>
           <Button
             variant="outline"
             className="flex-1 sm:flex-none bg-black/40 border-white/10 text-white hover:bg-white/10 hover:text-white"
