@@ -46,6 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await pb.collection('users').authWithPassword(identity, password)
       return { error: null }
     } catch (error) {
+      pb.authStore.clear()
       return { error }
     }
   }

@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { MessageSquareWarning, Loader2 } from 'lucide-react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { getErrorMessage } from '@/lib/pocketbase/errors'
 
 export function Login() {
   const [identity, setIdentity] = useState('')
@@ -24,14 +25,15 @@ export function Login() {
     const trimmedIdentity = identity.trim()
     const trimmedPassword = password.trim()
 
-    let loginIdentity = trimmedIdentity
-    if (!loginIdentity.includes('@')) {
-      loginIdentity = loginIdentity.replace(/\s+/g, '_').toLowerCase()
-    }
-
-    const { error } = await signIn(loginIdentity, trimmedPassword)
+    const { error } = await signIn(trimmedIdentity, trimmedPassword)
     if (error) {
-      toast.error('Login failed: Invalid username or password.')
+      const apiMsg = getErrorMessage(error)
+      const errorMsg =
+        apiMsg && apiMsg !== 'An unexpected error occurred.'
+          ? apiMsg
+          : 'Failed to authenticate. Please check your credentials.'
+
+      toast.error(errorMsg)
       setIsSubmitting(false)
     } else {
       toast.success('Login realizado com sucesso!')
