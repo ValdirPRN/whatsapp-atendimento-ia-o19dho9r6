@@ -23,7 +23,14 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { Plus, MessageSquare, AlertTriangle, CheckCircle2, AlertCircle } from 'lucide-react'
+import {
+  Plus,
+  MessageSquare,
+  AlertTriangle,
+  CheckCircle2,
+  AlertCircle,
+  MessageSquareWarning,
+} from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { extractFieldErrors } from '@/lib/pocketbase/errors'
 import { cn } from '@/lib/utils'
@@ -114,11 +121,20 @@ export default function IndexPage() {
 
   return (
     <div className="space-y-8 pb-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Dashboard de Erros</h1>
-          <p className="text-slate-400 mt-1">
-            Bem-vindo(a), {user?.name || 'Atendente'}. Registre e acompanhe os problemas da IA.
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative">
+        <div className="space-y-1 z-10">
+          <div className="flex items-center gap-4 mb-3">
+            <div className="bg-cyan-500/10 p-3 rounded-2xl border border-cyan-500/20 shadow-[0_0_20px_rgba(6,182,212,0.15)] backdrop-blur-md">
+              <MessageSquareWarning className="w-8 h-8 text-cyan-400" />
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-100 to-cyan-500 drop-shadow-md">
+              Agent<span className="font-light text-cyan-400">Pro</span>
+            </h1>
+          </div>
+          <p className="text-slate-400 text-base sm:text-lg max-w-xl">
+            Bem-vindo(a),{' '}
+            <span className="text-slate-200 font-medium">{user?.name || 'Atendente'}</span>. Central
+            de monitoramento inteligente e registro de ocorrências da IA.
           </p>
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
