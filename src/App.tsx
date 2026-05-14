@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from '@/hooks/use-auth'
 import AuthPage from '@/pages/Auth'
 import IndexPage from '@/pages/Index'
 import NovoRegistro from '@/pages/NovoRegistro'
+import HistoricoPage from '@/pages/Historico'
 import EquipePage from '@/pages/Equipe'
 import { Layout } from '@/components/Layout'
 
@@ -41,6 +42,7 @@ export default function App() {
             <Route path="/" element={<IndexPage />} />
             <Route path="/dashboard" element={<Navigate to="/" replace />} />
             <Route path="/novo-registro" element={<NovoRegistro />} />
+            <Route path="/historico" element={<HistoricoPage />} />
             <Route path="/equipe" element={<EquipePage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
-import { LayoutDashboard, LogOut, Menu, PlusCircle, Users } from 'lucide-react'
+import { LayoutDashboard, LogOut, Menu, PlusCircle, Users, History } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/sonner'
@@ -15,6 +15,7 @@ export function Layout() {
   const navItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
     { name: 'Novo Registro', path: '/novo-registro', icon: PlusCircle },
+    { name: 'Histórico de Erros', path: '/historico', icon: History },
     { name: 'Equipe', path: '/equipe', icon: Users },
   ]
 
