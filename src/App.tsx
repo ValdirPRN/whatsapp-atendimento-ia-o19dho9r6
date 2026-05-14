@@ -6,6 +6,7 @@ import NovoRegistro from '@/pages/NovoRegistro'
 import HistoricoPage from '@/pages/Historico'
 import EquipePage from '@/pages/Equipe'
 import { Layout } from '@/components/Layout'
+import { Toaster } from 'sonner'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
@@ -47,6 +48,7 @@ export default function App() {
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <Toaster theme="dark" position="top-right" />
       </AuthProvider>
     </BrowserRouter>
   )

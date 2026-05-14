@@ -53,10 +53,14 @@ export function ReportDetailsModal({ reportId, open, onOpenChange }: ReportDetai
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Corrigido':
+      case 'Corrigido aprovado':
       case 'Ignorado':
         return 'bg-slate-500/20 text-slate-400 border-slate-500/30'
       case 'Em Análise':
+      case 'Corrigido análise':
         return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+      case 'Enviado para ajuste':
+        return 'bg-orange-500/20 text-orange-400 border-orange-500/30'
       case 'Reportado':
       default:
         return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'

@@ -1,13 +1,20 @@
 import { useEffect, useState } from 'react'
-import { getReports } from '@/services/reports'
+import { getReports, updateReport, deleteReport } from '@/services/reports'
 import { useRealtime } from '@/hooks/use-realtime'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import { Link } from 'react-router-dom'
+import { toast } from 'sonner'
 import {
   AlertCircle,
   CheckCircle2,
@@ -20,6 +27,9 @@ import {
   AlertTriangle,
   Terminal,
   Plus,
+  Trash2,
+  Loader2,
+  ChevronDown,
 } from 'lucide-react'
 import type { ReportRecord } from '@/lib/types'
 import pb from '@/lib/pocketbase/client'
@@ -28,6 +38,8 @@ export default function HistoricoPage() {
   const [reports, setReports] = useState<ReportRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const loadReports = async () => {
     try {
@@ -48,9 +60,37 @@ export default function HistoricoPage() {
     loadReports()
   })
 
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      setUpdatingId(id)
+      await updateReport(id, { status: newStatus })
+      toast.success('Status atualizado com sucesso!')
+    } catch (error) {
+      console.error('Failed to update status', error)
+      toast.error('Erro ao atualizar o status.')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    try {
+      setUpdatingId(id)
+      await deleteReport(id)
+      setDeleteId(null)
+      toast.success('Relato excluído com sucesso!')
+    } catch (error) {
+      console.error('Failed to delete report', error)
+      toast.error('Erro ao excluir o relato.')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Corrigido':
+      case 'Corrigido aprovado':
       case 'Ignorado':
         return (
           <Badge className="bg-slate-500/10 text-slate-400 border-slate-500/20 hover:bg-slate-500/20 shadow-none">
@@ -58,9 +98,16 @@ export default function HistoricoPage() {
           </Badge>
         )
       case 'Em Análise':
+      case 'Corrigido análise':
         return (
           <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20 shadow-none">
             <AlertCircle className="w-3.5 h-3.5 mr-1.5" /> {status}
+          </Badge>
+        )
+      case 'Enviado para ajuste':
+        return (
+          <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 hover:bg-orange-500/20 shadow-none">
+            <AlertTriangle className="w-3.5 h-3.5 mr-1.5" /> {status}
           </Badge>
         )
       case 'Reportado':
@@ -232,7 +279,7 @@ export default function HistoricoPage() {
                     </div>
                   )}
 
-                  {/* Footer / Meta Data / Image Button */}
+                  {/* Footer / Meta Data & Action Bar */}
                   <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-4 border-t border-white/10">
                     <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
                       <span className="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded-md border border-white/5">
@@ -250,20 +297,60 @@ export default function HistoricoPage() {
                       <span className="text-slate-500 font-mono">ID: {report.id}</span>
                     </div>
 
-                    {images.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {images.length > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-cyan-500/10 text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/20 hover:text-cyan-300 transition-colors h-8"
+                          onClick={() => {
+                            const url = pb.files.getURL(report as any, images[0])
+                            setPreviewImage(url)
+                          }}
+                        >
+                          <ImageIcon className="w-4 h-4 mr-2" />
+                          Ver imagem
+                        </Button>
+                      )}
+
+                      <div className="relative">
+                        <select
+                          value={report.status}
+                          onChange={(e) => handleStatusChange(report.id, e.target.value)}
+                          disabled={updatingId === report.id}
+                          className="appearance-none bg-black/40 border border-white/10 text-slate-200 text-xs font-medium rounded-md pl-3 pr-8 py-1.5 h-8 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 disabled:opacity-50 cursor-pointer w-full sm:w-auto"
+                        >
+                          <option value="Reportado">Reportado</option>
+                          <option value="Em Análise">Em Análise</option>
+                          <option value="Enviado para ajuste">Enviado para ajuste</option>
+                          <option value="Corrigido análise">Corrigido análise</option>
+                          <option value="Corrigido aprovado">Corrigido aprovado</option>
+                          <option value="Ignorado">Ignorado</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                          {updatingId === report.id ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          )}
+                        </div>
+                      </div>
+
                       <Button
                         variant="outline"
                         size="sm"
-                        className="bg-cyan-500/10 text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/20 hover:text-cyan-300 transition-colors"
-                        onClick={() => {
-                          const url = pb.files.getURL(report as any, images[0])
-                          setPreviewImage(url)
-                        }}
+                        className="bg-red-500/10 text-red-400 border-red-500/30 hover:bg-red-500/20 hover:text-red-300 transition-colors h-8 w-8 p-0"
+                        onClick={() => setDeleteId(report.id)}
+                        title="Excluir relato"
+                        disabled={updatingId === report.id}
                       >
-                        <ImageIcon className="w-4 h-4 mr-2" />
-                        Ver imagem
+                        {updatingId === report.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
                       </Button>
-                    )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -294,6 +381,46 @@ export default function HistoricoPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <DialogContent className="bg-black/90 border-white/10 text-white shadow-2xl sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl text-white">Confirmar Exclusão</DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Tem certeza que deseja excluir este registro? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteId(null)}
+              className="border-white/10 text-white hover:bg-white/10"
+              disabled={!!updatingId}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => deleteId && handleDelete(deleteId)}
+              className="bg-red-600 hover:bg-red-700 text-white border-none"
+              disabled={!!updatingId}
+            >
+              {updatingId === deleteId ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Excluir
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

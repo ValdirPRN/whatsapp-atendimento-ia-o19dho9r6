@@ -7,7 +7,15 @@ export type ErrorCategory =
 
 export type ErrorSeverity = 'Baixa' | 'Média' | 'Alta' | 'Crítica' | string
 
-export type ErrorStatus = 'Reportado' | 'Em Análise' | 'Corrigido' | 'Ignorado' | string
+export type ErrorStatus =
+  | 'Reportado'
+  | 'Em Análise'
+  | 'Enviado para ajuste'
+  | 'Corrigido análise'
+  | 'Corrigido aprovado'
+  | 'Corrigido'
+  | 'Ignorado'
+  | string
 
 export interface TimelineEvent {
   id: string
