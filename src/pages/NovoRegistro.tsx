@@ -99,7 +99,7 @@ export default function NovoRegistro() {
       })
 
       setTimeout(() => {
-        navigate('/historico')
+        navigate('/')
       }, 1500)
     } catch (error) {
       console.error(error)

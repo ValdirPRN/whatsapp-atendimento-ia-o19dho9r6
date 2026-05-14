@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/hooks/use-auth'
 import AuthPage from '@/pages/Auth'
 import IndexPage from '@/pages/Index'
-import HistoricoPage from '@/pages/Historico'
 import NovoRegistro from '@/pages/NovoRegistro'
 import EquipePage from '@/pages/Equipe'
 import { Layout } from '@/components/Layout'
@@ -41,7 +40,6 @@ export default function App() {
           >
             <Route path="/" element={<IndexPage />} />
             <Route path="/dashboard" element={<Navigate to="/" replace />} />
-            <Route path="/historico" element={<HistoricoPage />} />
             <Route path="/novo-registro" element={<NovoRegistro />} />
             <Route path="/equipe" element={<EquipePage />} />
           </Route>
