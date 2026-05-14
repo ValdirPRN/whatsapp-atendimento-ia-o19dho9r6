@@ -1,22 +1,22 @@
 import { useEffect, useState } from 'react'
 import { getReports, type Report } from '@/services/reports'
-import { useAuth } from '@/hooks/use-auth'
 import { useRealtime } from '@/hooks/use-realtime'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { AlertCircle, CheckCircle2, Clock, Inbox, ShieldAlert } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Clock, Inbox, ShieldAlert, User } from 'lucide-react'
+import { ReportDetailsModal } from '@/components/ReportDetailsModal'
 
 export default function HistoricoPage() {
-  const { user } = useAuth()
   const [reports, setReports] = useState<Report[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const loadReports = async () => {
-    if (!user) return
     try {
-      const data = await getReports(`user_id = "${user.id}"`)
+      const data = await getReports('', '-created')
       setReports(data)
     } catch (error) {
       console.error(error)
@@ -27,7 +27,7 @@ export default function HistoricoPage() {
 
   useEffect(() => {
     loadReports()
-  }, [user?.id])
+  }, [])
 
   useRealtime('reports', () => {
     loadReports()
@@ -36,20 +36,22 @@ export default function HistoricoPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Corrigido':
+      case 'Ignorado':
         return (
-          <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20">
-            <CheckCircle2 className="w-3 h-3 mr-1" /> Corrigido
+          <Badge className="bg-slate-500/10 text-slate-400 border-slate-500/20 hover:bg-slate-500/20">
+            <CheckCircle2 className="w-3 h-3 mr-1" /> {status}
           </Badge>
         )
       case 'Em Análise':
         return (
           <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20">
-            <AlertCircle className="w-3 h-3 mr-1" /> Em Análise
+            <AlertCircle className="w-3 h-3 mr-1" /> {status}
           </Badge>
         )
+      case 'Reportado':
       default:
         return (
-          <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20">
+          <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20">
             <Clock className="w-3 h-3 mr-1" /> {status || 'Reportado'}
           </Badge>
         )
@@ -59,27 +61,23 @@ export default function HistoricoPage() {
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
       case 'Crítica':
-        return (
-          <Badge variant="outline" className="text-red-400 border-red-500/30">
-            Crítica
-          </Badge>
-        )
       case 'Alta':
         return (
-          <Badge variant="outline" className="text-orange-400 border-orange-500/30">
-            Alta
+          <Badge variant="outline" className="text-red-400 border-red-500/30">
+            {severity}
           </Badge>
         )
       case 'Média':
         return (
-          <Badge variant="outline" className="text-yellow-400 border-yellow-500/30">
-            Média
+          <Badge variant="outline" className="text-orange-400 border-orange-500/30">
+            {severity}
           </Badge>
         )
+      case 'Baixa':
       default:
         return (
-          <Badge variant="outline" className="text-green-400 border-green-500/30">
-            Baixa
+          <Badge variant="outline" className="text-blue-400 border-blue-500/30">
+            {severity || 'Baixa'}
           </Badge>
         )
     }
@@ -104,7 +102,7 @@ export default function HistoricoPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Histórico de Erros</h1>
-          <p className="text-slate-400">Acompanhe o status dos erros que você reportou.</p>
+          <p className="text-slate-400">Acompanhe o status dos erros relatados pelo time.</p>
         </div>
       </div>
 
@@ -112,10 +110,7 @@ export default function HistoricoPage() {
         <Card className="bg-black/40 border-white/10 backdrop-blur-xl">
           <CardContent className="flex flex-col items-center justify-center h-64 text-slate-400">
             <Inbox className="w-12 h-12 mb-4 opacity-50 text-cyan-500" />
-            <p className="text-lg font-medium text-white">Nenhum erro relatado ainda</p>
-            <p className="text-sm mt-1">
-              Seus registros aparecerão aqui quando você criar um novo report.
-            </p>
+            <p className="text-lg font-medium text-white">Nenhum erro reportado no momento.</p>
           </CardContent>
         </Card>
       ) : (
@@ -123,7 +118,11 @@ export default function HistoricoPage() {
           {reports.map((report) => (
             <Card
               key={report.id}
-              className="bg-black/40 border-white/10 backdrop-blur-xl overflow-hidden hover:bg-white/[0.02] transition-all duration-300 hover:border-white/20"
+              onClick={() => {
+                setSelectedReportId(report.id)
+                setModalOpen(true)
+              }}
+              className="bg-black/40 border-white/10 backdrop-blur-xl overflow-hidden cursor-pointer hover:bg-white/[0.04] transition-all duration-300 hover:border-white/20"
             >
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center mb-4">
@@ -134,12 +133,22 @@ export default function HistoricoPage() {
                     >
                       {report.title || 'Registro sem título'}
                     </h3>
-                    <p className="text-sm text-slate-400 flex items-center gap-2">
-                      <Clock className="w-3.5 h-3.5" />
-                      {format(new Date(report.created), "dd 'de' MMMM 'de' yyyy, 'às' HH:mm", {
-                        locale: ptBR,
-                      })}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-slate-400">
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5" />
+                        {format(new Date(report.created), "dd 'de' MMM 'de' yyyy, 'às' HH:mm", {
+                          locale: ptBR,
+                        })}
+                      </span>
+                      {report.expand?.user_id && (
+                        <span className="flex items-center gap-1.5 bg-white/5 px-2 py-0.5 rounded-md">
+                          <User className="w-3.5 h-3.5 text-cyan-400" />
+                          <span className="text-slate-300">
+                            {report.expand.user_id.name || report.expand.user_id.email}
+                          </span>
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {getStatusBadge(report.status)}
@@ -157,6 +166,12 @@ export default function HistoricoPage() {
           ))}
         </div>
       )}
+
+      <ReportDetailsModal
+        reportId={selectedReportId}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+      />
     </div>
   )
 }
