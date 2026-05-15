@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getReports, updateReport, deleteReport } from '@/services/reports'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useAuth } from '@/hooks/use-auth'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
@@ -30,16 +31,39 @@ import {
   Trash2,
   Loader2,
   ChevronDown,
+  MessageSquareAlert,
 } from 'lucide-react'
 import type { ReportRecord } from '@/lib/types'
 import pb from '@/lib/pocketbase/client'
+import { ReportDetailsModal } from '@/components/ReportDetailsModal'
 
 export default function HistoricoPage() {
+  const { user } = useAuth()
   const [reports, setReports] = useState<ReportRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
+  const [devMessagesMap, setDevMessagesMap] = useState<Record<string, boolean>>({})
+
+  const loadDevMessages = async () => {
+    try {
+      const messages = await pb.collection('report_messages').getFullList({
+        expand: 'user_id',
+        fields: 'report_id,expand.user_id.role',
+      })
+      const map: Record<string, boolean> = {}
+      messages.forEach((msg: any) => {
+        if (msg.expand?.user_id?.role === 'dev' || msg.expand?.user_id?.role === 'admin') {
+          map[msg.report_id] = true
+        }
+      })
+      setDevMessagesMap(map)
+    } catch (error) {
+      console.error('Failed to load dev messages', error)
+    }
+  }
 
   const loadReports = async () => {
     try {
@@ -54,10 +78,15 @@ export default function HistoricoPage() {
 
   useEffect(() => {
     loadReports()
+    loadDevMessages()
   }, [])
 
   useRealtime('reports', () => {
     loadReports()
+  })
+
+  useRealtime('report_messages', () => {
+    loadDevMessages()
   })
 
   const handleStatusChange = async (id: string, newStatus: string) => {
@@ -218,9 +247,20 @@ export default function HistoricoPage() {
                   {/* Header */}
                   <div className="flex flex-col md:flex-row gap-4 justify-between md:items-start mb-6">
                     <div className="space-y-3">
-                      <h3 className="text-xl font-bold text-white leading-tight">
-                        {report.title || 'Registro sem título'}
-                      </h3>
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-xl font-bold text-white leading-tight">
+                          {report.title || 'Registro sem título'}
+                        </h3>
+                        {user?.role !== 'dev' && devMessagesMap[report.id] && (
+                          <button
+                            onClick={() => setSelectedReportId(report.id)}
+                            className="flex items-center justify-center text-amber-400 hover:text-amber-300 bg-amber-400/10 hover:bg-amber-400/20 p-1.5 rounded-full transition-colors animate-pulse border border-amber-400/20 shrink-0"
+                            title="Nova interação técnica disponível"
+                          >
+                            <MessageSquareAlert className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 text-sm text-cyan-400 bg-cyan-500/10 w-fit px-2.5 py-1 rounded-md border border-cyan-500/20">
                         <ShieldAlert className="w-3.5 h-3.5" />
                         <span className="font-medium text-slate-200">
@@ -385,6 +425,13 @@ export default function HistoricoPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Report Details Modal */}
+      <ReportDetailsModal
+        reportId={selectedReportId}
+        open={!!selectedReportId}
+        onOpenChange={(open) => !open && setSelectedReportId(null)}
+      />
 
       {/* Delete Confirmation Modal */}
       <Dialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
