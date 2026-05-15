@@ -38,6 +38,12 @@ export function ReportDevModal({ report, open, onOpenChange }: ReportDevModalPro
 
   const handleSave = async () => {
     if (!report) return
+
+    if (report.status !== 'Reportado' && status === 'Reportado') {
+      toast.error('Não é possível retornar ao status Reportado.')
+      return
+    }
+
     setLoading(true)
     try {
       await updateReport(report.id, { status, technical_notes: notes })
@@ -122,7 +128,9 @@ export function ReportDevModal({ report, open, onOpenChange }: ReportDevModalPro
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-950 border-slate-800 text-white">
-                  <SelectItem value="Reportado">Reportado</SelectItem>
+                  <SelectItem value="Reportado" disabled={report.status !== 'Reportado'}>
+                    Reportado
+                  </SelectItem>
                   <SelectItem value="Em análise">Em análise</SelectItem>
                   <SelectItem value="Problema resolvido">Problema resolvido</SelectItem>
                 </SelectContent>
