@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge'
 import pb from '@/lib/pocketbase/client'
 import { ReportRecord } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { ReportDiscussion } from '@/components/ReportDiscussion'
 
 interface ReportDetailsModalProps {
   reportId: string | null
@@ -196,6 +197,10 @@ export function ReportDetailsModal({ reportId, open, onOpenChange }: ReportDetai
                     </div>
                   </div>
                 )}
+
+                <div className="pt-2">
+                  <ReportDiscussion reportId={error.id} />
+                </div>
               </div>
 
               <div className="border-t border-white/10 pt-4 mt-2 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-400">

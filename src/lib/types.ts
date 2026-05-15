@@ -58,3 +58,21 @@ export interface DailyStat {
   errors: number
   resolved: number
 }
+
+export interface ReportMessage {
+  id: string
+  report_id: string
+  user_id: string
+  content: string
+  created: string
+  updated: string
+  expand?: {
+    user_id?: {
+      id: string
+      name: string
+      email: string
+      role?: string
+      avatar?: string
+    }
+  }
+}

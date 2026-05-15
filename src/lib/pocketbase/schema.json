@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-15T12:25:01.910Z",
+  "generatedAt": "2026-05-15T12:33:53.841Z",
   "collections": [
     {
       "name": "users",
@@ -120,6 +120,54 @@
           "name": "images",
           "type": "file",
           "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "report_messages",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "user_id = @request.auth.id",
+        "delete": "@request.auth.role = 'admin'"
+      },
+      "fields": [
+        {
+          "name": "report_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "reports"
+        },
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "content",
+          "type": "text",
+          "required": true,
           "system": false
         },
         {

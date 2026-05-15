@@ -16,6 +16,7 @@ import pb from '@/lib/pocketbase/client'
 import { toast } from 'sonner'
 import type { ReportRecord } from '@/lib/types'
 import { Loader2, Image as ImageIcon } from 'lucide-react'
+import { ReportDiscussion } from '@/components/ReportDiscussion'
 
 interface ReportDevModalProps {
   report: ReportRecord | null
@@ -119,6 +120,10 @@ export function ReportDevModal({ report, open, onOpenChange }: ReportDevModalPro
               </div>
             </div>
           )}
+
+          <div className="my-6">
+            <ReportDiscussion reportId={report.id} />
+          </div>
 
           <div className="space-y-4 my-6 border-t border-white/10 pt-6">
             <div className="space-y-2">
