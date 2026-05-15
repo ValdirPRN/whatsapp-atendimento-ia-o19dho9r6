@@ -31,7 +31,7 @@ import {
   Trash2,
   Loader2,
   ChevronDown,
-  MessageSquareAlert,
+  MessageSquareWarning,
 } from 'lucide-react'
 import type { ReportRecord } from '@/lib/types'
 import pb from '@/lib/pocketbase/client'
@@ -257,7 +257,7 @@ export default function HistoricoPage() {
                             className="flex items-center justify-center text-amber-400 hover:text-amber-300 bg-amber-400/10 hover:bg-amber-400/20 p-1.5 rounded-full transition-colors animate-pulse border border-amber-400/20 shrink-0"
                             title="Nova interação técnica disponível"
                           >
-                            <MessageSquareAlert className="w-5 h-5" />
+                            <MessageSquareWarning className="w-5 h-5" />
                           </button>
                         )}
                       </div>
