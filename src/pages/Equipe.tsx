@@ -190,6 +190,7 @@ export default function EquipePage() {
                   <SelectContent className="bg-slate-950 border-white/10 text-white">
                     <SelectItem value="admin">Administrador</SelectItem>
                     <SelectItem value="membro">Membro</SelectItem>
+                    <SelectItem value="dev">Desenvolvedor (Dev)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -255,9 +256,11 @@ export default function EquipePage() {
                         <span className="text-slate-300 text-sm capitalize">
                           {u.role === 'admin'
                             ? 'Administrador'
-                            : u.role === 'membro' || u.role === 'member'
-                              ? 'Membro'
-                              : u.role || 'Membro'}
+                            : u.role === 'dev'
+                              ? 'Desenvolvedor'
+                              : u.role === 'membro' || u.role === 'member'
+                                ? 'Membro'
+                                : u.role || 'Membro'}
                         </span>
                       </div>
                     </TableCell>

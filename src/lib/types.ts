@@ -9,12 +9,11 @@ export type ErrorSeverity = 'Baixa' | 'Média' | 'Alta' | 'Crítica' | string
 
 export type ErrorStatus =
   | 'Reportado'
-  | 'Em Análise'
-  | 'Enviado para ajuste'
-  | 'Corrigido análise'
-  | 'Corrigido aprovado'
-  | 'Corrigido'
-  | 'Ignorado'
+  | 'Em análise'
+  | 'Aguardando validação'
+  | 'Problema resolvido'
+  | 'Problema não corrigido'
+  | 'Concluído'
   | string
 
 export interface TimelineEvent {

@@ -89,31 +89,35 @@ export default function HistoricoPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Corrigido':
-      case 'Corrigido aprovado':
-      case 'Ignorado':
+      case 'Problema resolvido':
+      case 'Concluído':
         return (
-          <Badge className="bg-slate-500/10 text-slate-400 border-slate-500/20 hover:bg-slate-500/20 shadow-none">
+          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30 shadow-none font-semibold">
             <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> {status}
           </Badge>
         )
-      case 'Em Análise':
-      case 'Corrigido análise':
+      case 'Problema não corrigido':
         return (
-          <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20 shadow-none">
-            <AlertCircle className="w-3.5 h-3.5 mr-1.5" /> {status}
+          <Badge className="bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30 shadow-none font-semibold">
+            <AlertTriangle className="w-3.5 h-3.5 mr-1.5" /> {status}
           </Badge>
         )
-      case 'Enviado para ajuste':
+      case 'Em análise':
+        return (
+          <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20 shadow-none">
+            <Clock className="w-3.5 h-3.5 mr-1.5 animate-pulse" /> {status}
+          </Badge>
+        )
+      case 'Aguardando validação':
         return (
           <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 hover:bg-orange-500/20 shadow-none">
-            <AlertTriangle className="w-3.5 h-3.5 mr-1.5" /> {status}
+            <AlertCircle className="w-3.5 h-3.5 mr-1.5" /> {status}
           </Badge>
         )
       case 'Reportado':
       default:
         return (
-          <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 shadow-none">
+          <Badge className="bg-slate-500/10 text-slate-400 border-slate-500/20 hover:bg-slate-500/20 shadow-none">
             <Clock className="w-3.5 h-3.5 mr-1.5" /> {status || 'Reportado'}
           </Badge>
         )
@@ -321,11 +325,11 @@ export default function HistoricoPage() {
                           className="appearance-none bg-black/40 border border-white/10 text-slate-200 text-xs font-medium rounded-md pl-3 pr-8 py-1.5 h-8 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 disabled:opacity-50 cursor-pointer w-full sm:w-auto"
                         >
                           <option value="Reportado">Reportado</option>
-                          <option value="Em Análise">Em Análise</option>
-                          <option value="Enviado para ajuste">Enviado para ajuste</option>
-                          <option value="Corrigido análise">Corrigido análise</option>
-                          <option value="Corrigido aprovado">Corrigido aprovado</option>
-                          <option value="Ignorado">Ignorado</option>
+                          <option value="Em análise">Em análise</option>
+                          <option value="Aguardando validação">Aguardando validação</option>
+                          <option value="Problema resolvido">Problema resolvido</option>
+                          <option value="Problema não corrigido">Problema não corrigido</option>
+                          <option value="Concluído">Concluído</option>
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
                           {updatingId === report.id ? (

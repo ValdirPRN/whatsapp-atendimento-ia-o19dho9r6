@@ -5,6 +5,7 @@ import IndexPage from '@/pages/Index'
 import NovoRegistro from '@/pages/NovoRegistro'
 import HistoricoPage from '@/pages/Historico'
 import EquipePage from '@/pages/Equipe'
+import DashboardDevPage from '@/pages/DashboardDev'
 import { Layout } from '@/components/Layout'
 import { Toaster } from 'sonner'
 
@@ -26,6 +27,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+function RoleBasedRedirect() {
+  const { user } = useAuth()
+  if (user?.role === 'dev') return <Navigate to="/dashboard-dev" replace />
+  return <IndexPage />
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -40,8 +47,9 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route path="/" element={<IndexPage />} />
+            <Route path="/" element={<RoleBasedRedirect />} />
             <Route path="/dashboard" element={<Navigate to="/" replace />} />
+            <Route path="/dashboard-dev" element={<DashboardDevPage />} />
             <Route path="/novo-registro" element={<NovoRegistro />} />
             <Route path="/historico" element={<HistoricoPage />} />
             <Route path="/equipe" element={<EquipePage />} />

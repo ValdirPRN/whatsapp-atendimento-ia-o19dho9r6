@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
-import { LayoutDashboard, LogOut, Menu, PlusCircle, Users, History } from 'lucide-react'
+import { LayoutDashboard, LogOut, Menu, PlusCircle, Users, History, Terminal } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/sonner'
@@ -12,12 +12,26 @@ export function Layout() {
   const { user, signOut } = useAuth()
   const location = useLocation()
 
-  const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-    { name: 'Novo Registro', path: '/novo-registro', icon: PlusCircle },
-    { name: 'Histórico de Erros', path: '/historico', icon: History },
-    { name: 'Equipe', path: '/equipe', icon: Users },
+  const allNavItems = [
+    { name: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['admin', 'membro', 'user'] },
+    { name: 'Painel Dev', path: '/dashboard-dev', icon: Terminal, roles: ['dev', 'admin'] },
+    {
+      name: 'Novo Registro',
+      path: '/novo-registro',
+      icon: PlusCircle,
+      roles: ['admin', 'membro', 'user'],
+    },
+    {
+      name: 'Histórico de Erros',
+      path: '/historico',
+      icon: History,
+      roles: ['admin', 'membro', 'user', 'dev'],
+    },
+    { name: 'Equipe', path: '/equipe', icon: Users, roles: ['admin'] },
   ]
+
+  const currentRole = user?.role || 'user'
+  const navItems = allNavItems.filter((item) => item.roles.includes(currentRole))
 
   return (
     <>
