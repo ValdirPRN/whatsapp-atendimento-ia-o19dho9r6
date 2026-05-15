@@ -14,7 +14,7 @@ export function Layout() {
 
   const allNavItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard, roles: ['admin', 'membro', 'user'] },
-    { name: 'Painel Dev', path: '/dashboard-dev', icon: Terminal, roles: ['dev', 'admin'] },
+    { name: 'Painel Dev', path: '/dashboard-dev', icon: Terminal, roles: ['dev'] },
     {
       name: 'Novo Registro',
       path: '/novo-registro',
@@ -25,7 +25,7 @@ export function Layout() {
       name: 'Histórico de Erros',
       path: '/historico',
       icon: History,
-      roles: ['admin', 'membro', 'user', 'dev'],
+      roles: ['admin', 'membro', 'user'],
     },
     { name: 'Equipe', path: '/equipe', icon: Users, roles: ['admin'] },
   ]

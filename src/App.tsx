@@ -33,6 +33,14 @@ function RoleBasedRedirect() {
   return <IndexPage />
 }
 
+function DevRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth()
+  if (user?.role !== 'dev') {
+    return <Navigate to="/" replace />
+  }
+  return <>{children}</>
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -49,7 +57,14 @@ export default function App() {
           >
             <Route path="/" element={<RoleBasedRedirect />} />
             <Route path="/dashboard" element={<Navigate to="/" replace />} />
-            <Route path="/dashboard-dev" element={<DashboardDevPage />} />
+            <Route
+              path="/dashboard-dev"
+              element={
+                <DevRoute>
+                  <DashboardDevPage />
+                </DevRoute>
+              }
+            />
             <Route path="/novo-registro" element={<NovoRegistro />} />
             <Route path="/historico" element={<HistoricoPage />} />
             <Route path="/equipe" element={<EquipePage />} />

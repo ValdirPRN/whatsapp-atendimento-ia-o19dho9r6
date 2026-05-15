@@ -124,10 +124,7 @@ export function ReportDevModal({ report, open, onOpenChange }: ReportDevModalPro
                 <SelectContent className="bg-slate-950 border-slate-800 text-white">
                   <SelectItem value="Reportado">Reportado</SelectItem>
                   <SelectItem value="Em análise">Em análise</SelectItem>
-                  <SelectItem value="Aguardando validação">Aguardando validação</SelectItem>
                   <SelectItem value="Problema resolvido">Problema resolvido</SelectItem>
-                  <SelectItem value="Problema não corrigido">Problema não corrigido</SelectItem>
-                  <SelectItem value="Concluído">Concluído</SelectItem>
                 </SelectContent>
               </Select>
             </div>

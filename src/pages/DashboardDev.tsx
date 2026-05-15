@@ -5,21 +5,13 @@ import { ReportDevModal } from '@/components/ReportDevModal'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Terminal, Filter, Clock, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { Terminal, Filter, Clock, AlertTriangle, CheckCircle2, User } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import type { ReportRecord } from '@/lib/types'
@@ -53,34 +45,34 @@ export default function DashboardDevPage() {
   const getBadge = (status: string) => {
     if (status === 'Problema resolvido' || status === 'Concluído') {
       return (
-        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 font-semibold shadow-none">
+        <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 font-semibold shadow-none whitespace-nowrap">
           <CheckCircle2 className="w-3 h-3 mr-1" /> {status}
         </Badge>
       )
     }
     if (status === 'Problema não corrigido') {
       return (
-        <Badge className="bg-red-500/20 text-red-400 border-red-500/30 font-semibold shadow-none">
+        <Badge className="bg-red-500/20 text-red-400 border-red-500/30 font-semibold shadow-none whitespace-nowrap">
           <AlertTriangle className="w-3 h-3 mr-1" /> {status}
         </Badge>
       )
     }
     if (status === 'Aguardando validação') {
       return (
-        <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 shadow-none">
+        <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 shadow-none whitespace-nowrap">
           {status}
         </Badge>
       )
     }
     if (status === 'Em análise') {
       return (
-        <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 shadow-none">
+        <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 shadow-none whitespace-nowrap">
           <Clock className="w-3 h-3 mr-1 animate-pulse" /> {status}
         </Badge>
       )
     }
     return (
-      <Badge className="bg-slate-500/10 text-slate-400 border-slate-500/20 shadow-none">
+      <Badge className="bg-slate-500/10 text-slate-400 border-slate-500/20 shadow-none whitespace-nowrap">
         {status || 'Reportado'}
       </Badge>
     )
@@ -111,68 +103,59 @@ export default function DashboardDevPage() {
               <SelectItem value="todos">Todos os Status</SelectItem>
               <SelectItem value="Reportado">Reportado</SelectItem>
               <SelectItem value="Em análise">Em análise</SelectItem>
-              <SelectItem value="Aguardando validação">Aguardando validação</SelectItem>
               <SelectItem value="Problema resolvido">Problema resolvido</SelectItem>
-              <SelectItem value="Problema não corrigido">Problema não corrigido</SelectItem>
-              <SelectItem value="Concluído">Concluído</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      <Card className="bg-black/40 border-white/10 backdrop-blur-xl shadow-xl shadow-black/40">
-        <CardHeader className="border-b border-white/5 bg-black/20 pb-4">
-          <CardTitle className="text-xl text-white">Fila de Chamados</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 overflow-x-auto">
-          <Table>
-            <TableHeader className="bg-white/5">
-              <TableRow className="border-white/10 hover:bg-transparent">
-                <TableHead className="text-slate-400 font-medium">Data</TableHead>
-                <TableHead className="text-slate-400 font-medium">Título</TableHead>
-                <TableHead className="text-slate-400 font-medium">Reportado por</TableHead>
-                <TableHead className="text-slate-400 font-medium">Severidade</TableHead>
-                <TableHead className="text-slate-400 font-medium text-right pr-6">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredReports.map((r) => (
-                <TableRow
-                  key={r.id}
-                  className="border-white/5 hover:bg-white/10 cursor-pointer transition-colors"
-                  onClick={() => setSelectedReport(r)}
-                >
-                  <TableCell className="text-slate-300 text-sm whitespace-nowrap">
-                    {format(new Date(r.created), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                  </TableCell>
-                  <TableCell className="text-white font-medium max-w-[200px] truncate">
+      {filteredReports.length === 0 ? (
+        <Card className="bg-black/40 border-white/10 backdrop-blur-xl">
+          <CardContent className="flex flex-col items-center justify-center py-20 text-slate-400">
+            <Terminal className="w-16 h-16 mb-6 opacity-50 text-cyan-500" />
+            <p className="text-xl font-medium text-white mb-2">Nenhum chamado encontrado</p>
+            <p className="text-slate-400 text-center max-w-md">
+              Não há relatos correspondentes ao filtro atual.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredReports.map((r) => (
+            <Card
+              key={r.id}
+              className="bg-black/40 border-white/10 backdrop-blur-xl shadow-xl shadow-black/40 hover:bg-white/5 transition-colors cursor-pointer flex flex-col"
+              onClick={() => setSelectedReport(r)}
+            >
+              <CardHeader className="pb-4">
+                <div className="flex justify-between items-start gap-4 mb-2">
+                  <CardTitle className="text-lg text-white font-semibold line-clamp-2 leading-tight">
                     {r.title || 'Sem título'}
-                  </TableCell>
-                  <TableCell className="text-slate-400 text-sm">
-                    {r.expand?.user_id?.name || r.expand?.user_id?.email || 'Sistema'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className="border-white/10 text-slate-300 shadow-none bg-black/50"
-                    >
-                      {r.severity || 'Média'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right pr-6">{getBadge(r.status)}</TableCell>
-                </TableRow>
-              ))}
-              {filteredReports.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-12 text-slate-500">
-                    Nenhum chamado encontrado para este filtro.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </CardTitle>
+                </div>
+                <div>{getBadge(r.status)}</div>
+                <div className="text-sm text-slate-400 mt-4 line-clamp-3">
+                  {r.context || r.actual_behavior}
+                </div>
+              </CardHeader>
+              <CardContent className="mt-auto pt-4 flex flex-col gap-2 border-t border-white/5">
+                <div className="flex items-center justify-between text-xs text-slate-400">
+                  <div className="flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-cyan-400" />
+                    <span className="truncate max-w-[120px]">
+                      {r.expand?.user_id?.name || r.expand?.user_id?.email || 'Sistema'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>{format(new Date(r.created), 'dd/MM/yyyy', { locale: ptBR })}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <ReportDevModal
         report={selectedReport}
